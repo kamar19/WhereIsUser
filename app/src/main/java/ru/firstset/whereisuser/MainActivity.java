@@ -1,47 +1,50 @@
 package ru.firstset.whereisuser;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
-import com.google.android.gms.maps.*;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import com.google.android.gms.maps.GoogleMap;
+public class MainActivity extends AppCompatActivity {
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback  {
+
+    //public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     GoogleMap googleMap;
     private static final double TARGET_LATITUDE = 17.893366;
     private static final double TARGET_LONGITUDE = 19.511868;
+    SupportMapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        String geoUriString = "geo:0,10?z=2";
-//        Uri geoUri = Uri.parse(geoUriString);
-//        Intent mapIntent = new Intent(Intent.ACTION_VIEW, geoUri);
-//        if (mapIntent.resolveActivity(getPackageManager()) != null) {
-//            startActivity(mapIntent);
-//        }
-        createMapView();
-        addMarker();
     }
 
     private void createMapView(){
 
         try {
             if( googleMap==null){
-                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                        .findFragmentById(R.id.mapView);
-                mapFragment.getMapAsync(this);
+
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+//                mapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                assert mapFragment != null;
+//                mapFragment.getMapAsync(this);
+                mapFragment = new MapFragment();
+                fragmentManager.beginTransaction()
+                        .add(R.id.frameLayout, mapFragment)
+                        .commit();
 
                 if(null == googleMap) {
                     Toast.makeText(getApplicationContext(),
@@ -75,12 +78,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .draggable(false)
             );
         }
+
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-            googleMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(0, 0))
-                    .title("Marker"));
-        }
+//
+//    @Override
+//    public void onMapReady(GoogleMap googleMap) {
+//        googleMap.addMarker(new MarkerOptions()
+//                .position(new LatLng(0, 0))
+//                .title("Marker"));
+//    }
+
 }
