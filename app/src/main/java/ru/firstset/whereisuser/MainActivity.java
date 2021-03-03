@@ -29,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        mapFragment = new MapFragment();
+
+        fragmentManager.beginTransaction()
+                .add(R.id.frameLayout, mapFragment)
+                .commit();
     }
 
     private void createMapView(){
