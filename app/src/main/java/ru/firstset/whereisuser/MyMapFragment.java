@@ -1,8 +1,6 @@
 package ru.firstset.whereisuser;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Geocoder;
 import android.location.Location;
@@ -12,7 +10,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -58,23 +55,17 @@ public class MyMapFragment extends SupportMapFragment implements
         GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private static final String TAG = "TAG";
     GoogleMap googleMap;
-    private static final double TARGET_LATITUDE = 17.893366;
-    private static final double TARGET_LONGITUDE = 19.511868;
-    private static final String UNIQUE_WORK_NAME = "MoviePeriodicJob";
-    private static final Long PERIODIC_SERVISE_TIME_DIRATION = 15L;
+    private static final String UNIQUE_WORK_NAME = "MapPeriodicJob";
     private static final TimeUnit PERIODIC_SERVISE_TIME_UNIT = TimeUnit.MINUTES;
 
     private RequestPermissions requestPermissions;
 
-    //    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int DEFAULT_ZOOM = 15;
-
 
     private WorkManager workManager;
     TextView tvEnabledGPS;
@@ -104,7 +95,6 @@ public class MyMapFragment extends SupportMapFragment implements
     private PeriodicWorker periodicWorker;
 
 
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -114,10 +104,10 @@ public class MyMapFragment extends SupportMapFragment implements
         }
         requestPermissions = new RequestPermissions(getActivity());
 
-        tvEnabledGPS = (TextView) view.findViewById(R.id.tvEnabledGPS);
-        tvStatusGPS = (TextView) view.findViewById(R.id.tvStatusGPS);
+        tvEnabledGPS = (TextView) view.findViewById(R.id.textViewEnabledGPS);
+        tvStatusGPS = (TextView) view.findViewById(R.id.textViewStatusGPS);
         tvLocationGPS = (TextView) view.findViewById(R.id.tvLocationGPS);
-        tvEnabledNet = (TextView) view.findViewById(R.id.tvEnabledNet);
+        tvEnabledNet = (TextView) view.findViewById(R.id.textViewEnabledNet);
         tvStatusNet = (TextView) view.findViewById(R.id.tvStatusNet);
         tvLocationNet = (TextView) view.findViewById(R.id.tvLocationNet);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -134,37 +124,12 @@ public class MyMapFragment extends SupportMapFragment implements
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
-//        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//            return;
-//        }
-//        fusedLocationClient.getLastLocation()
-//                .addOnSuccessListener((Executor) this, new OnSuccessListener<Location>() {
-//                    @Override
-//                    public void onSuccess(Location location) {
-//                        // Got last known location. In some rare situations this can be null.
-//                        if (location != null) {
-//                            // Logic to handle location object
-//                            Log.v("onSuccess","Logic to handle location object");
-//                        }
-//                    }
-//                });
-//        initListeners();
     }
 
     @Override
     public void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
-        Log.e("onStart()", "mGoogleApiClient.connect()");
-
     }
 
     @Override
@@ -173,54 +138,20 @@ public class MyMapFragment extends SupportMapFragment implements
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-        Log.e("onStop()", "mGoogleApiClient.disconnect()");
-
     }
 
     @Override
     public void onConnected(Bundle bundle) {
+        if (requestPermissions.checkPermission()) {
+                locationPermissionGranted = true;
+            currentLocation = LocationServices
+                    .FusedLocationApi
+                    .getLastLocation(mGoogleApiClient);
 
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+            } else {
+                requestPermissions.requestPermission();
+            }
         }
-        currentLocation = LocationServices
-                .FusedLocationApi
-                .getLastLocation(mGoogleApiClient);
-        Log.e("onConnected", "end");
-
-    }
-
-
-//    private void initCamera(Location location) {
-//
-//        CameraPosition position = CameraPosition.builder()
-//                .target(new LatLng(location.getLatitude(),
-//                        location.getLongitude()))
-//                .zoom(16f)
-//                .bearing(0.0f)
-//                .tilt(0.0f)
-//                .build();
-//
-////        CameraPosition newCamPos = new CameraPosition(new LatLng(13.0810,80.2740),
-////                15.5f,
-////                map.getCameraPosition().tilt, //use old tilt
-////                map.getCameraPosition().bearing); //use old bearing
-////        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCamPos), 4000, null);
-////
-////        googleMap = new GoogleMap();
-//        Log.v("initCamera", googleMap.toString());
-//
-//        googleMap.animateCamera(CameraUpdateFactory
-//                .newCameraPosition(position), null);
-//
-//    }
 
     private void initListeners() {
         googleMap.setOnMarkerClickListener(this);
@@ -231,10 +162,8 @@ public class MyMapFragment extends SupportMapFragment implements
 
     @Override
     public void onMapClick(LatLng latLng) {
-
         MarkerOptions options = new MarkerOptions().position(latLng);
         options.title(getAddressFromLatLng(latLng));
-
         options.icon(BitmapDescriptorFactory.defaultMarker());
         googleMap.addMarker(options);
     }
@@ -243,22 +172,18 @@ public class MyMapFragment extends SupportMapFragment implements
     public void onMapLongClick(LatLng latLng) {
         MarkerOptions options = new MarkerOptions().position(latLng);
         options.title(getAddressFromLatLng(latLng));
-
         options.icon(BitmapDescriptorFactory.fromBitmap(
                 BitmapFactory.decodeResource(getResources(),
                         R.mipmap.ic_launcher)));
-
         googleMap.addMarker(options);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     private String getAddressFromLatLng(LatLng latLng) {
         Geocoder geocoder = new Geocoder(getActivity());
-
         String address = "";
         try {
             address = geocoder
@@ -266,16 +191,13 @@ public class MyMapFragment extends SupportMapFragment implements
                     .get(0).getAddressLine(0);
         } catch (IOException e) {
         }
-
         return address;
     }
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         marker.showInfoWindow();
         return true;
     }
-
 
     private void drawCircle(LatLng location) {
         CircleOptions options = new CircleOptions();
@@ -336,20 +258,14 @@ public class MyMapFragment extends SupportMapFragment implements
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.e("onMapReady", "0");
-
         googleMap.addMarker(new MarkerOptions()
                 .position(new LatLng(0, 0))
                 .title("Marker"));
         this.googleMap = googleMap;
-        Log.e("onMapReady", "googleMap=googleMap");
-
         this.googleMap.setOnMyLocationButtonClickListener(this);
         this.googleMap.setOnMyLocationClickListener(this);
-//        enableMyLocation();
         getLocationPermission();
         setUpMap();
-
         getDeviceLocation();
     }
 
@@ -417,67 +333,6 @@ public class MyMapFragment extends SupportMapFragment implements
     }
 
 
-    @Override
-    public void onPause() {
-        super.onPause();
-//        locationManager.removeUpdates(locationListener);
-    }
-//
-//    private LocationListener locationListener = new LocationListener() {
-//
-//        @Override
-//        public void onLocationChanged(Location location) {
-//            showLocation(location);
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String provider) {
-//            checkEnabled();
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String provider) {
-//            checkEnabled();
-//            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                return;
-//            }
-//            showLocation(locationManager.getLastKnownLocation(provider));
-//        }
-//
-//        @Override
-//        public void onStatusChanged(String provider, int status, Bundle extras) {
-//            if (status != 0) {
-//                if (provider.equals(LocationManager.GPS_PROVIDER)) {
-//                    tvStatusGPS.setText("Status: " + String.valueOf(status));
-//                } else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-//                    tvStatusNet.setText("Status: " + String.valueOf(status));
-//                }
-//            }
-//        }
-//    };
-
-//    private void showLocation(Location location) {
-//        if (location == null)
-//            return;
-//        else if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) {
-//            tvLocationGPS.setText(formatLocation(location));
-//        } else if (location.getProvider().equals(
-//                LocationManager.NETWORK_PROVIDER)) {
-//            tvLocationNet.setText(formatLocation(location));
-//        }
-//    }
-//
-//    @SuppressLint("DefaultLocale")
-//    private String formatLocation(Location location) {
-//        if (location == null)
-//            return "";
-//        else
-//            return String.format(
-//                    "Coordinates: lat = %1$.4f, lon = %2$.4f, time = %3$tF %3$tT",
-//                    location.getLatitude(), location.getLongitude(), new Date(
-//                            location.getTime()));
-//    }
-
     @SuppressLint("SetTextI18n")
     private void checkEnabled() {
         Log.v("checkEnabled", locationManager.toString());
@@ -498,16 +353,16 @@ public class MyMapFragment extends SupportMapFragment implements
 
     public void startPeriodicWork() {
         workManager = WorkManager.getInstance(getContext());
-        Constraints constraints = (Constraints)new Constraints.Builder()
-                .build();
+//        Constraints constraints = (Constraints)new Constraints.Builder()
+//                .build();
 //        val periodicWorkRequest: PeriodicWorkRequest =
 //                PeriodicWorkRequestBuilder<PeriodicWorker>(
 //                        PERIODIC_SERVISE_TIME_DIRATION,
 //                PERIODIC_SERVISE_TIME_UNIT
 //            )
 
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(PeriodicWorker.class, PERIODIC_SERVISE_TIME_DIRATION, PERIODIC_SERVISE_TIME_UNIT)
-                .setConstraints(constraints)
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(PeriodicWorker.class, 15, PERIODIC_SERVISE_TIME_UNIT)
+//                .setConstraints(constraints)
                 .build();
         workManager.enqueueUniquePeriodicWork(UNIQUE_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
         Log.v("startPeriodicWork()", PeriodicWorker.getCurrentDateTimeString());
