@@ -1,4 +1,4 @@
-package ru.firstset.whereisuser;
+package ru.firstset.whereisuser.location;
 
 public class Location {
     private Long id;

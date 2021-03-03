@@ -32,7 +32,8 @@ dependencies {
     implementation  'com.google.android.gms:play-services-gcm:17.0.0'
     implementation platform('com.google.firebase:firebase-bom:26.6.0')
     implementation 'com.google.firebase:firebase-analytics'
-
+    implementation "androidx.work:work-runtime:2.5.0"
+    implementation "androidx.work:work-rxjava2:2.5.0"
 }
 
 
