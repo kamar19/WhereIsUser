@@ -1,18 +1,16 @@
 package ru.firstset.whereisuser;
 
-import android.annotation.SuppressLint;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,43 +20,29 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import android.content.Intent;
 import android.location.LocationManager;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.Button;
 
 import ru.firstset.whereisuser.permission.RequestPermissions;
+import ru.firstset.whereisuser.services.ServiceLocations;
 
 public class MyMapFragment extends SupportMapFragment implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnInfoWindowClickListener,
-        GoogleMap.OnMapLongClickListener,
-        GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     GoogleMap googleMap;
-    private static final String UNIQUE_WORK_NAME = "MapPeriodicJob";
-    private static final TimeUnit PERIODIC_SERVISE_TIME_UNIT = TimeUnit.MINUTES;
-
+//    private static final String UNIQUE_WORK_NAME = "MapPeriodicJob";
     private RequestPermissions requestPermissions;
 
     private boolean locationPermissionGranted;
@@ -66,17 +50,8 @@ public class MyMapFragment extends SupportMapFragment implements
     private static final String KEY_LOCATION = "location";
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int DEFAULT_ZOOM = 15;
-
-    private WorkManager workManager;
-    TextView tvEnabledGPS;
-    TextView tvStatusGPS;
-    TextView tvLocationGPS;
-    TextView tvEnabledNet;
-    TextView tvStatusNet;
-    TextView tvLocationNet;
-
-    StringBuilder sbGPS = new StringBuilder();
-    StringBuilder sbNet = new StringBuilder();
+    private SharedPreferences sharedPreferences;
+    public static final String BUTTON_KEY = "BUTTON_KEY";
 
     private LocationManager locationManager;
     private FusedLocationProviderClient fusedLocationClient;
@@ -92,28 +67,26 @@ public class MyMapFragment extends SupportMapFragment implements
             GoogleMap.MAP_TYPE_NONE};
 
     private int curMapTypeIndex = 1;
-    private PeriodicWorker periodicWorker;
+
+//    @Override
+//    public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
+//        View view = super.onCreateView(inflater, viewGroup, bundle);
+//        Log.v("onCreateView", view.toString());
+//
+//        return view = inflater.inflate(R.layout.activity_main, viewGroup, false);
+//    }
 
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (savedInstanceState != null) {
-            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
-        }
+//        if (savedInstanceState != null) {
+//            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+//            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+//        }
         requestPermissions = new RequestPermissions(getActivity());
 
-        tvEnabledGPS = (TextView) view.findViewById(R.id.textViewEnabledGPS);
-        tvStatusGPS = (TextView) view.findViewById(R.id.textViewStatusGPS);
-        tvLocationGPS = (TextView) view.findViewById(R.id.tvLocationGPS);
-        tvEnabledNet = (TextView) view.findViewById(R.id.textViewEnabledNet);
-        tvStatusNet = (TextView) view.findViewById(R.id.tvStatusNet);
-        tvLocationNet = (TextView) view.findViewById(R.id.tvLocationNet);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-//        stopPeriodicWork();
-        startPeriodicWork();
 
         getMapAsync(this);
 
@@ -124,7 +97,7 @@ public class MyMapFragment extends SupportMapFragment implements
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-    }
+        }
 
     @Override
     public void onStart() {
@@ -140,44 +113,45 @@ public class MyMapFragment extends SupportMapFragment implements
         }
     }
 
+
     @Override
     public void onConnected(Bundle bundle) {
         if (requestPermissions.checkPermission()) {
-                locationPermissionGranted = true;
+            locationPermissionGranted = true;
             currentLocation = LocationServices
                     .FusedLocationApi
                     .getLastLocation(mGoogleApiClient);
 
-            } else {
-                requestPermissions.requestPermission();
-            }
+        } else {
+            requestPermissions.requestPermission();
         }
-
-    private void initListeners() {
-        googleMap.setOnMarkerClickListener(this);
-        googleMap.setOnMapLongClickListener(this);
-        googleMap.setOnInfoWindowClickListener(this);
-        googleMap.setOnMapClickListener(this);
     }
 
-    @Override
-    public void onMapClick(LatLng latLng) {
-        MarkerOptions options = new MarkerOptions().position(latLng);
-        options.title(getAddressFromLatLng(latLng));
-        options.icon(BitmapDescriptorFactory.defaultMarker());
-        googleMap.addMarker(options);
-    }
-
-    @Override
-    public void onMapLongClick(LatLng latLng) {
-        MarkerOptions options = new MarkerOptions().position(latLng);
-        options.title(getAddressFromLatLng(latLng));
-        options.icon(BitmapDescriptorFactory.fromBitmap(
-                BitmapFactory.decodeResource(getResources(),
-                        R.mipmap.ic_launcher)));
-        googleMap.addMarker(options);
-    }
-
+    //    private void initListeners() {
+//        googleMap.setOnMarkerClickListener(this);
+//        googleMap.setOnMapLongClickListener(this);
+//        googleMap.setOnInfoWindowClickListener(this);
+//        googleMap.setOnMapClickListener(this);
+//    }
+//
+//    @Override
+//    public void onMapClick(LatLng latLng) {
+//        MarkerOptions options = new MarkerOptions().position(latLng);
+//        options.title(getAddressFromLatLng(latLng));
+//        options.icon(BitmapDescriptorFactory.defaultMarker());
+//        googleMap.addMarker(options);
+//    }
+//
+//    @Override
+//    public void onMapLongClick(LatLng latLng) {
+//        MarkerOptions options = new MarkerOptions().position(latLng);
+//        options.title(getAddressFromLatLng(latLng));
+//        options.icon(BitmapDescriptorFactory.fromBitmap(
+//                BitmapFactory.decodeResource(getResources(),
+//                        R.mipmap.ic_launcher)));
+//        googleMap.addMarker(options);
+//    }
+//
     @Override
     public void onConnectionSuspended(int i) {
     }
@@ -193,53 +167,54 @@ public class MyMapFragment extends SupportMapFragment implements
         }
         return address;
     }
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        marker.showInfoWindow();
-        return true;
-    }
 
-    private void drawCircle(LatLng location) {
-        CircleOptions options = new CircleOptions();
-        options.center(location);
-        //Radius in meters
-        options.radius(10);
-       /* options.fillColor( getResources()
-                .getColor( R.color.fill_color ) );
-        options.strokeColor( getResources()
-                .getColor( R.color.stroke_color ) );*/
-        options.strokeWidth(10);
-        googleMap.addCircle(options);
-    }
+//    @Override
+//    public boolean onMarkerClick(Marker marker) {
+//        marker.showInfoWindow();
+//        return true;
+//    }
 
-    private void drawPolygon(LatLng startingLocation) {
-        LatLng point2 = new LatLng(startingLocation.latitude + .001,
-                startingLocation.longitude);
-        LatLng point3 = new LatLng(startingLocation.latitude,
-                startingLocation.longitude + .001);
-
-        PolygonOptions options = new PolygonOptions();
-        options.add(startingLocation, point2, point3);
-
-        /*options.fillColor( getResources()
-                .getColor( R.color.fill_color ) );
-        options.strokeColor( getResources()
-                .getColor( R.color.stroke_color ) );*/
-        options.strokeWidth(10);
-
-        googleMap.addPolygon(options);
-    }
-
-    private void drawOverlay(LatLng location, int width, int height) {
-        GroundOverlayOptions options = new GroundOverlayOptions();
-        options.position(location, width, height);
-
-        options.image(BitmapDescriptorFactory
-                .fromBitmap(BitmapFactory
-                        .decodeResource(getResources(),
-                                R.mipmap.ic_launcher)));
-        googleMap.addGroundOverlay(options);
-    }
+//    private void drawCircle(LatLng location) {
+//        CircleOptions options = new CircleOptions();
+//        options.center(location);
+//        //Radius in meters
+//        options.radius(10);
+//       /* options.fillColor( getResources()
+//                .getColor( R.color.fill_color ) );
+//        options.strokeColor( getResources()
+//                .getColor( R.color.stroke_color ) );*/
+//        options.strokeWidth(10);
+//        googleMap.addCircle(options);
+//    }
+//
+//    private void drawPolygon(LatLng startingLocation) {
+//        LatLng point2 = new LatLng(startingLocation.latitude + .001,
+//                startingLocation.longitude);
+//        LatLng point3 = new LatLng(startingLocation.latitude,
+//                startingLocation.longitude + .001);
+//
+//        PolygonOptions options = new PolygonOptions();
+//        options.add(startingLocation, point2, point3);
+//
+//        /*options.fillColor( getResources()
+//                .getColor( R.color.fill_color ) );
+//        options.strokeColor( getResources()
+//                .getColor( R.color.stroke_color ) );*/
+//        options.strokeWidth(10);
+//
+//        googleMap.addPolygon(options);
+//    }
+//
+//    private void drawOverlay(LatLng location, int width, int height) {
+//        GroundOverlayOptions options = new GroundOverlayOptions();
+//        options.position(location, width, height);
+//
+//        options.image(BitmapDescriptorFactory
+//                .fromBitmap(BitmapFactory
+//                        .decodeResource(getResources(),
+//                                R.mipmap.ic_launcher)));
+//        googleMap.addGroundOverlay(options);
+//    }
 
     @Override
     public void getMapAsync(OnMapReadyCallback callback) {
@@ -250,11 +225,11 @@ public class MyMapFragment extends SupportMapFragment implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-
-    }
+//
+//    @Override
+//    public void onInfoWindowClick(Marker marker) {
+//
+//    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -262,8 +237,8 @@ public class MyMapFragment extends SupportMapFragment implements
                 .position(new LatLng(0, 0))
                 .title("Marker"));
         this.googleMap = googleMap;
-        this.googleMap.setOnMyLocationButtonClickListener(this);
-        this.googleMap.setOnMyLocationClickListener(this);
+//        this.googleMap.setOnMyLocationButtonClickListener(this);
+//        this.googleMap.setOnMyLocationClickListener(this);
         getLocationPermission();
         setUpMap();
         getDeviceLocation();
@@ -333,60 +308,56 @@ public class MyMapFragment extends SupportMapFragment implements
     }
 
 
-    @SuppressLint("SetTextI18n")
-    private void checkEnabled() {
-        Log.v("checkEnabled", locationManager.toString());
-        tvEnabledGPS.setText("Enabled: "
-                + locationManager
-                .isProviderEnabled(LocationManager.GPS_PROVIDER));
-        Log.v("checkEnabled2", locationManager.toString());
+//    @SuppressLint("SetTextI18n")
+//    private void checkEnabled() {
+//        Log.v("checkEnabled", locationManager.toString());
+//        tvEnabledGPS.setText("Enabled: "
+//                + locationManager
+//                .isProviderEnabled(LocationManager.GPS_PROVIDER));
+//        Log.v("checkEnabled2", locationManager.toString());
+//
+//        tvEnabledNet.setText("Enabled: "
+//                + locationManager
+//                .isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+//    }
 
-        tvEnabledNet.setText("Enabled: "
-                + locationManager
-                .isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-    }
 
-    public void onClick(View v) {
-        startActivity(new Intent(
-                android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-    }
-
-    public void startPeriodicWork() {
-        workManager = WorkManager.getInstance(getContext());
-//        Constraints constraints = (Constraints)new Constraints.Builder()
+//    public void startPeriodicWork() {
+//        workManager = WorkManager.getInstance(getContext());
+////        Constraints constraints = (Constraints)new Constraints.Builder()
+////                .build();
+////        val periodicWorkRequest: PeriodicWorkRequest =
+////                PeriodicWorkRequestBuilder<PeriodicWorker>(
+////                        PERIODIC_SERVISE_TIME_DIRATION,
+////                PERIODIC_SERVISE_TIME_UNIT
+////            )
+//
+//        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(PeriodicWorker.class, 15, PERIODIC_SERVISE_TIME_UNIT)
+////                .setConstraints(constraints)
 //                .build();
-//        val periodicWorkRequest: PeriodicWorkRequest =
-//                PeriodicWorkRequestBuilder<PeriodicWorker>(
-//                        PERIODIC_SERVISE_TIME_DIRATION,
-//                PERIODIC_SERVISE_TIME_UNIT
-//            )
+//        workManager.enqueueUniquePeriodicWork(UNIQUE_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
+//        Log.v("startPeriodicWork()", PeriodicWorker.getCurrentDateTimeString());
+//
+//    }
 
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(PeriodicWorker.class, 15, PERIODIC_SERVISE_TIME_UNIT)
-//                .setConstraints(constraints)
-                .build();
-        workManager.enqueueUniquePeriodicWork(UNIQUE_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
-        Log.v("startPeriodicWork()", PeriodicWorker.getCurrentDateTimeString());
+//    public void stopPeriodicWork() {
+//        WorkManager workManager = WorkManager.getInstance();
+//        workManager.cancelUniqueWork(UNIQUE_WORK_NAME);
+//        Log.v("stopPeriodicWork()", "stop");
+//    }
 
-    }
-
-    public void stopPeriodicWork() {
-        WorkManager workManager = WorkManager.getInstance();
-        workManager.cancelUniqueWork(UNIQUE_WORK_NAME);
-        Log.v("stopPeriodicWork()", "stop");
-    }
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(getContext(), "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
-        return false;
-    }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(getContext(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
-    }
+//    @Override
+//    public boolean onMyLocationButtonClick() {
+//        Toast.makeText(getContext(), "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+//        // Return false so that we don't consume the event and the default behavior still occurs
+//        // (the camera animates to the user's current position).
+//        return false;
+//    }
+//
+//    @Override
+//    public void onMyLocationClick(@NonNull Location location) {
+//        Toast.makeText(getContext(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
+//    }
 
     private void getLocationPermission() {
         /*
@@ -407,7 +378,7 @@ public class MyMapFragment extends SupportMapFragment implements
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         locationPermissionGranted = false;
         getLocationPermission();
         setUpMap();
@@ -453,6 +424,51 @@ public class MyMapFragment extends SupportMapFragment implements
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
+        }
+    }
+
+    public void saveButtonSaveTrackVisible(Boolean value) {
+        SharedPreferences.Editor editorSharedPreferences = sharedPreferences.edit();
+        editorSharedPreferences.putBoolean(BUTTON_KEY, value);
+        editorSharedPreferences.apply();
+    }
+
+
+    public Boolean checkButtonSaveTrack() {
+        Boolean boolValue;
+        if (sharedPreferences == null) {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+            boolValue = sharedPreferences.getBoolean(BUTTON_KEY, true);
+        } else return false;
+        return boolValue;
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonLocationSettings: {
+                startActivity(new Intent(
+                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                break;
+            }
+            case R.id.buttonSaveTrack: {
+                Intent intent = new Intent(this.getActivity().getApplicationContext(), ServiceLocations.class);
+                if (checkButtonSaveTrack()) {
+                    saveButtonSaveTrackVisible(false); // Запись и видумость у кнопки Stop
+                    Button button = v.findViewById(R.id.buttonSaveTrack);
+                    button.setText(getText(R.string.button_stop_track));
+                    Log.v("onClick", "true");
+                    this.getActivity().getApplicationContext().startService(intent);
+
+                } else {
+                    saveButtonSaveTrackVisible(true); // Запись и видумость у кнопки Stop
+                    Button button = v.findViewById(R.id.buttonSaveTrack);
+                    button.setText(getText(R.string.button_save_track));
+                    this.getActivity().getApplicationContext().stopService(intent);
+                    Log.v("stopService", " end");
+
+                }
+                break;
+            }
         }
     }
 }

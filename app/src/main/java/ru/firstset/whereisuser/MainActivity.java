@@ -7,16 +7,10 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.Button;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
@@ -30,6 +24,7 @@ public class MainActivity extends AppCompatActivity{
     private static final double TARGET_LATITUDE = 17.893366;
     private static final double TARGET_LONGITUDE = 19.511868;
     public static final List<AppPermission> listPermission = null;
+
 //    SupportMapFragment mapFragment;
     MyMapFragment myMapFragment;
 
@@ -38,12 +33,24 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        myMapFragment = new MyMapFragment();
 
-        fragmentManager.beginTransaction()
-                .add(R.id.frameLayout, myMapFragment)
-                .commit();
+        if (savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            myMapFragment = new MyMapFragment();
+            fragmentManager.beginTransaction()
+                    .add(R.id.frameLayout, myMapFragment)
+                    .commit();
+        }
+
+//        Button button = findViewById(R.id.buttonSaveTrack);
+//        Boolean booleanValue =myMapFragment.checkButtonSaveTrack();
+//        if (booleanValue) {
+//            button.setText(getText(R.string.button_stop_track)); ;
+//        } else
+//            button.setText(getText(R.string.button_save_track)); ;
+//
+
+
 
 
     }
@@ -109,11 +116,9 @@ public class MainActivity extends AppCompatActivity{
 //        }
 //
 //    }
-
+//
     public void onClickLocationSettings(View view) {
         myMapFragment.onClick(view);
     }
-
-
 
 }

@@ -1,9 +1,9 @@
 package ru.firstset.whereisuser.location;
 
 public class Location {
-    private Long id;
-    private Double latitude;
-    private Double longitude;
-    private String title;
+    public int id;
+    public Double latitude;
+    public Double longitude;
+    public String title;
 
 }
