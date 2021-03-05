@@ -1,9 +1,7 @@
 package ru.firstset.whereisuser;
 
 import android.content.SharedPreferences;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -28,16 +26,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import android.content.Intent;
 import android.location.LocationManager;
-import android.widget.Button;
 
-import ru.firstset.whereisuser.location.LocationListenerMap;
+import ru.firstset.whereisuser.data.UtilLocationUser;
+import ru.firstset.whereisuser.data.LocationDatabase;
+import ru.firstset.whereisuser.data.LocationUser;
+import ru.firstset.whereisuser.data.Track;
 import ru.firstset.whereisuser.permission.RequestPermissions;
 import ru.firstset.whereisuser.services.ServiceLocations;
+import ru.firstset.whereisuser.util.DataUtils;
+import ru.firstset.whereisuser.location.LocationRepository;
 
 public class MyMapFragment extends SupportMapFragment implements
         OnMapReadyCallback,
@@ -45,32 +46,46 @@ public class MyMapFragment extends SupportMapFragment implements
         GoogleApiClient.OnConnectionFailedListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    GoogleMap googleMap;
-    LocationListenerMap locationListenerMap;
-
+    //    private static zzz fusedLocationClient;
+    static GoogleMap googleMap;
     //    private static final String UNIQUE_WORK_NAME = "MapPeriodicJob";
     private RequestPermissions requestPermissions;
 
-    private boolean locationPermissionGranted;
+    private static boolean locationPermissionGranted;
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    public static final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int DEFAULT_ZOOM = 15;
-    private SharedPreferences sharedPreferences;
+    private static SharedPreferences sharedPreferences;
     public static final String BUTTON_KEY = "BUTTON_KEY";
+    public static final String POINT_KEY = "POINT_KEY";
+    public static final String CURRENT_LATITUDE = "CURRENT_LATITUDE";
+    public static final String CURRENT_LONGITUDE = "CURRENT_LONGITUDE";
 
     private LocationManager locationManager;
-    private FusedLocationProviderClient fusedLocationClient;
+    private static FusedLocationProviderClient fusedLocationClient;
     private GoogleApiClient mGoogleApiClient;
     private Location currentLocation;
-    private Location lastKnownLocation;
+    public static Location lastKnownLocation;
     private CameraPosition cameraPosition;
+
+    static LocationRepository locationRepository;
+    static Track track;
+    static int currentTrack;
+    static int currentPoint;
+    //    static CurrentLocationUser currentLocationUser;
+    static Float currentLatitude;
+    static Float currentLongitude;
+    static UtilLocationUser utilLocationUser;
+
 
     private final int[] MAP_TYPES = {GoogleMap.MAP_TYPE_SATELLITE,
             GoogleMap.MAP_TYPE_NORMAL,
             GoogleMap.MAP_TYPE_HYBRID,
             GoogleMap.MAP_TYPE_TERRAIN,
             GoogleMap.MAP_TYPE_NONE};
+
+    public static LocationDatabase locationDatabase;
 
     private int curMapTypeIndex = 1;
 
@@ -91,7 +106,18 @@ public class MyMapFragment extends SupportMapFragment implements
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        locationListenerMap = new LocationListenerMap(getContext());
+        track = new Track(sharedPreferences);
+        Log.v("onViewCreated","1");
+        currentTrack = Integer.valueOf(track.loadIdTrack());
+        Log.v("onViewCreated","2");
+
+//        locationDatabase = Room.databaseBuilder(getActivity(),
+//                LocationDatabase.class, DBContract.TABLE_NAME).build();
+        locationRepository = new LocationRepository(getActivity());
+        utilLocationUser = new UtilLocationUser();
+        currentLatitude = utilLocationUser.getCurrentLatitude(sharedPreferences);
+        currentLongitude = utilLocationUser.getCurrentLongitude(sharedPreferences);
+
     }
 
     @Override
@@ -234,7 +260,7 @@ public class MyMapFragment extends SupportMapFragment implements
 //        this.googleMap.setOnMyLocationClickListener(this);
         getLocationPermission();
         setUpMap();
-        getDeviceLocation();
+        getUserLocation();
     }
 
     public void setUpMap() {
@@ -285,6 +311,7 @@ public class MyMapFragment extends SupportMapFragment implements
     public void onResume() {
         super.onResume();
         checkButtonSaveTrack();
+//        utilLocationUser =
 //
 //        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 //                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -387,11 +414,12 @@ public class MyMapFragment extends SupportMapFragment implements
         super.onSaveInstanceState(outState);
     }
 
-    public void getDeviceLocation() {
+    public static void getUserLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
          */
+        LocationUser locationUser;
         try {
             if (locationPermissionGranted) {
                 Task<Location> locationResult = fusedLocationClient.getLastLocation();
@@ -419,36 +447,55 @@ public class MyMapFragment extends SupportMapFragment implements
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
-    }
+        if (lastKnownLocation!=null)
+    if ((currentLatitude != lastKnownLocation.getLatitude()) & (currentLongitude != lastKnownLocation.getLongitude()))
+        {
+            int point = track.loadIdPoint();
+            point++;
+            track.saveIdTrack(point);
+            locationUser = new LocationUser(point, lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude(),
+                    KEY_LOCATION, currentTrack, DataUtils.getCurrentDateTimeString());
+            Log.v("getUserLocation",locationUser.toString());
+            Log.v("latitude",locationUser.latitude.toString());
+            Log.v("longitude",locationUser.longitude.toString());
+            Log.v("time",locationUser.time.toString());
+            Log.v("title",locationUser.title.toString());
+            Log.v("id",String.valueOf(locationUser.id));
+            Log.v("track",String.valueOf(locationUser.track));
+//            LocationRepository
+            locationRepository.saveLocation(locationUser);
+            Log.v("getUserLocation","4");
 
-    public void saveButtonSaveTrackVisible(Boolean value) {
-        Log.v("saveButton", "0");
-        if (sharedPreferences == null) {
-
+            utilLocationUser.saveCurrentLocation(sharedPreferences, currentLatitude, currentLongitude);
         }
 
-        SharedPreferences.Editor editorSharedPreferences = sharedPreferences.edit();
-        editorSharedPreferences.putBoolean(BUTTON_KEY, value);
-        editorSharedPreferences.apply();
-        Log.v("saveButton", value.toString());
 
+    }
+
+
+    public void saveButtonSaveTrackVisible(Boolean value) {
+        if (sharedPreferences != null) {
+            SharedPreferences.Editor editorSharedPreferences = sharedPreferences.edit();
+            editorSharedPreferences.putBoolean(BUTTON_KEY, value);
+            editorSharedPreferences.apply();
+            Log.v("saveButton", value.toString());
+        }
     }
 
 
     public Boolean checkButtonSaveTrack() {
-        Boolean boolValue;
-        if (sharedPreferences != null) {
+        Boolean boolValue = false;
+        if (sharedPreferences == null) {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-            boolValue = sharedPreferences.getBoolean(BUTTON_KEY, true);
-            Log.v("checkButtonSaveTrack", boolValue.toString());
-            if (boolValue) {
-                MainActivity.button.setText(getText(R.string.button_save_track));
-            } else {
-                MainActivity.button.setText(getText(R.string.button_stop_track));
-            }
+        }
 
-
-        } else return false;
+        boolValue = sharedPreferences.getBoolean(BUTTON_KEY, true);
+        Log.v("checkButtonSaveTrack", boolValue.toString());
+        if (boolValue) {
+            MainActivity.button.setText(getText(R.string.button_save_track));
+        } else {
+            MainActivity.button.setText(getText(R.string.button_stop_track));
+        }
 
         return boolValue;
     }
@@ -471,11 +518,15 @@ public class MyMapFragment extends SupportMapFragment implements
                 Log.v("onClick", "intent");
 
                 if (checkButtonSaveTrack()) {
-                    Log.v("conClick", "true");
+                    Log.v("onClick", "true");
                     saveButtonSaveTrackVisible(false); // Запись и видумость у кнопки Stop
                     MainActivity.button.setText(getText(R.string.button_stop_track));
-                    this.getActivity().getApplicationContext().startService(intent);
 
+                    this.getActivity().getApplicationContext().startService(intent);
+                    currentTrack++;
+
+                    track.saveIdTrack(currentTrack);
+                    getUserLocation();
                 } else {
                     Log.v("onClick", "false");
                     saveButtonSaveTrackVisible(true); // Запись и видимость у кнопки Start

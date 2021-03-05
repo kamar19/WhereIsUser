@@ -8,6 +8,8 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -126,5 +128,29 @@ public class MainActivity extends AppCompatActivity{
     public void onClickLocationSettings(View view) {
         myMapFragment. onClick(view);
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.menuMap:
+                headerView.setText("Настройки");
+                return true;
+            case R.id.menuHistory:
+                headerView.setText("Открыть");
+                break;
+            case R.id.menuExit:
+                this.finish();
+                break;
+        }
+        //headerView.setText(item.getTitle());
+        return super.onOptionsItemSelected(item);
+    }
+}
 
 }
