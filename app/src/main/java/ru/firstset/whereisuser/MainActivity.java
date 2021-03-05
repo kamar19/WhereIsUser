@@ -1,9 +1,11 @@
 package ru.firstset.whereisuser;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,11 +29,14 @@ public class MainActivity extends AppCompatActivity{
 
 //    SupportMapFragment mapFragment;
     MyMapFragment myMapFragment;
+    public static Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        button = findViewById(R.id.buttonSaveTrack);
+        button.setText(getText(R.string.button_save_track));
 
 
         if (savedInstanceState == null) {
@@ -117,8 +122,9 @@ public class MainActivity extends AppCompatActivity{
 //
 //    }
 //
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void onClickLocationSettings(View view) {
-        myMapFragment.onClick(view);
+        myMapFragment. onClick(view);
     }
 
 }

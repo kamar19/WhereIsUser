@@ -5,7 +5,7 @@ import java.util.List;
 public class LocationRepository {
 
     //    suspend fun getAllLocations(): List<Location>
-    private List<Location> getAllLocations() {
+    private List<LocationMap> getAllLocations() {
         return null;
     }
 

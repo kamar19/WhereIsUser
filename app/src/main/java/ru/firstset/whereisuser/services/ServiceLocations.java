@@ -16,6 +16,8 @@ import ru.firstset.whereisuser.util.NotificationLocation;
 
 public class ServiceLocations extends Service {
     private static final int idLocation = 505050;
+    private static final int idLocation2= 505052;
+
     private static final int TIMER_PERIOD = 60000;
     public static final String NAME_SERVICE = "ServiceLocation";
     private Timer timerLocation;
@@ -24,20 +26,6 @@ public class ServiceLocations extends Service {
     public ServiceLocations() {
         super();
     }
-
-    private NotificationLocation notification;
-    private static final String intentExtraNameLatitude = "latitude";
-    private static final String intentExtraNamelongitude = "longitude";
-    private final Double defaultLocationLatitude = -33.8523341;
-    private final Double defaultLocationLongitude = 151.2106085;
-
-//    @Override
-//    protected void onHandleIntent(@Nullable Intent intent) {
-//        assert intent != null;
-//        Double latitude = intent.getDoubleExtra(intentExtraNameLatitude, defaultLocationLatitude);
-//        Double longitude = intent.getDoubleExtra(intentExtraNamelongitude, defaultLocationLongitude);
-//        Log.v(NAME_SERVICE, getString(R.string.latitude_messages) + latitude + getString(R.string.longitude_messages) + longitude);
-//    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -48,21 +36,51 @@ public class ServiceLocations extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v("onStartCommand", "0");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            startForeground();
-        else
-            startForeground(505050, new Notification());
-        return START_NOT_STICKY;
+        if ((flags & START_FLAG_RETRY) == 0) {
+            if (timerLocation != null) {
+                timerLocation.cancel();
+                timerLocation = null;
+            }
+            // Новый таймер
+            timerLocation = new Timer();
+            locationTimerTask = new LocationTimerTask();
+            timerLocation.schedule(locationTimerTask, 1000, TIMER_PERIOD);//минута
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.v("onStartCommand()", "true");
+            NotificationLocation notificationLocation = new NotificationLocation(getApplicationContext());
+
+            startForeground(idLocation, notificationLocation.notification);
+
+        }
+        else {
+            Log.v("onStartCommand()", "false");
+            startForeground(idLocation, new Notification());
+        }
+        return START_STICKY;
     }
 
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void startForeground() {
-         NotificationLocation notification = new NotificationLocation(getApplicationContext());
-        startForeground(5050502, notification.notification);
-    }
+//    @RequiresApi(api = Build.VERSION_CODES.O)
+//    private void startForeground() {
+////         NotificationLocation notification = new NotificationLocation(getApplicationContext());
+//         NotificationLocation notification = new NotificationLocation(getApplication());
+////        startForeground(idLocation2, notification.notification);
+
+
+
+
+
+
+
+
+
+
+
 //
 //
 //

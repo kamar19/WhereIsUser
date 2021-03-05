@@ -3,6 +3,7 @@ package ru.firstset.whereisuser;
 import android.content.SharedPreferences;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -27,11 +29,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import android.content.Intent;
 import android.location.LocationManager;
 import android.widget.Button;
 
+import ru.firstset.whereisuser.location.LocationListenerMap;
 import ru.firstset.whereisuser.permission.RequestPermissions;
 import ru.firstset.whereisuser.services.ServiceLocations;
 
@@ -42,7 +46,9 @@ public class MyMapFragment extends SupportMapFragment implements
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     GoogleMap googleMap;
-//    private static final String UNIQUE_WORK_NAME = "MapPeriodicJob";
+    LocationListenerMap locationListenerMap;
+
+    //    private static final String UNIQUE_WORK_NAME = "MapPeriodicJob";
     private RequestPermissions requestPermissions;
 
     private boolean locationPermissionGranted;
@@ -68,15 +74,6 @@ public class MyMapFragment extends SupportMapFragment implements
 
     private int curMapTypeIndex = 1;
 
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
-//        View view = super.onCreateView(inflater, viewGroup, bundle);
-//        Log.v("onCreateView", view.toString());
-//
-//        return view = inflater.inflate(R.layout.activity_main, viewGroup, false);
-//    }
-
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -85,19 +82,17 @@ public class MyMapFragment extends SupportMapFragment implements
 //            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
 //        }
         requestPermissions = new RequestPermissions(getActivity());
-
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
         getMapAsync(this);
-
         setHasOptionsMenu(true);
-
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        }
+        locationListenerMap = new LocationListenerMap(getContext());
+    }
 
     @Override
     public void onStart() {
@@ -113,7 +108,6 @@ public class MyMapFragment extends SupportMapFragment implements
         }
     }
 
-
     @Override
     public void onConnected(Bundle bundle) {
         if (requestPermissions.checkPermission()) {
@@ -121,7 +115,6 @@ public class MyMapFragment extends SupportMapFragment implements
             currentLocation = LocationServices
                     .FusedLocationApi
                     .getLastLocation(mGoogleApiClient);
-
         } else {
             requestPermissions.requestPermission();
         }
@@ -156,17 +149,17 @@ public class MyMapFragment extends SupportMapFragment implements
     public void onConnectionSuspended(int i) {
     }
 
-    private String getAddressFromLatLng(LatLng latLng) {
-        Geocoder geocoder = new Geocoder(getActivity());
-        String address = "";
-        try {
-            address = geocoder
-                    .getFromLocation(latLng.latitude, latLng.longitude, 1)
-                    .get(0).getAddressLine(0);
-        } catch (IOException e) {
-        }
-        return address;
-    }
+//    private String getAddressFromLatLng(LatLng latLng) {
+//        Geocoder geocoder = new Geocoder(getActivity());
+//        String address = "";
+//        try {
+//            address = geocoder
+//                    .getFromLocation(latLng.latitude, latLng.longitude, 1)
+//                    .get(0).getAddressLine(0);
+//        } catch (IOException e) {
+//        }
+//        return address;
+//    }
 
 //    @Override
 //    public boolean onMarkerClick(Marker marker) {
@@ -291,6 +284,7 @@ public class MyMapFragment extends SupportMapFragment implements
     @Override
     public void onResume() {
         super.onResume();
+        checkButtonSaveTrack();
 //
 //        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 //                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -393,7 +387,7 @@ public class MyMapFragment extends SupportMapFragment implements
         super.onSaveInstanceState(outState);
     }
 
-    private void getDeviceLocation() {
+    public void getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -428,41 +422,65 @@ public class MyMapFragment extends SupportMapFragment implements
     }
 
     public void saveButtonSaveTrackVisible(Boolean value) {
+        Log.v("saveButton", "0");
+        if (sharedPreferences == null) {
+
+        }
+
         SharedPreferences.Editor editorSharedPreferences = sharedPreferences.edit();
         editorSharedPreferences.putBoolean(BUTTON_KEY, value);
         editorSharedPreferences.apply();
+        Log.v("saveButton", value.toString());
+
     }
 
 
     public Boolean checkButtonSaveTrack() {
         Boolean boolValue;
-        if (sharedPreferences == null) {
+        if (sharedPreferences != null) {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
             boolValue = sharedPreferences.getBoolean(BUTTON_KEY, true);
+            Log.v("checkButtonSaveTrack", boolValue.toString());
+            if (boolValue) {
+                MainActivity.button.setText(getText(R.string.button_save_track));
+            } else {
+                MainActivity.button.setText(getText(R.string.button_stop_track));
+            }
+
+
         } else return false;
+
         return boolValue;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void onClick(View v) {
+        Log.v("onClick", "0");
+
         switch (v.getId()) {
             case R.id.buttonLocationSettings: {
+                Log.v("onClick", "1");
+
                 startActivity(new Intent(
                         android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                 break;
             }
             case R.id.buttonSaveTrack: {
-                Intent intent = new Intent(this.getActivity().getApplicationContext(), ServiceLocations.class);
+                Log.v("onClick", "2");
+                Intent intent = new Intent(Objects.requireNonNull(this.getActivity()).getApplicationContext(), ServiceLocations.class);
+                Log.v("onClick", "intent");
+
                 if (checkButtonSaveTrack()) {
+                    Log.v("conClick", "true");
                     saveButtonSaveTrackVisible(false); // Запись и видумость у кнопки Stop
-                    Button button = v.findViewById(R.id.buttonSaveTrack);
-                    button.setText(getText(R.string.button_stop_track));
-                    Log.v("onClick", "true");
+                    MainActivity.button.setText(getText(R.string.button_stop_track));
                     this.getActivity().getApplicationContext().startService(intent);
 
                 } else {
-                    saveButtonSaveTrackVisible(true); // Запись и видумость у кнопки Stop
-                    Button button = v.findViewById(R.id.buttonSaveTrack);
-                    button.setText(getText(R.string.button_save_track));
+                    Log.v("onClick", "false");
+                    saveButtonSaveTrackVisible(true); // Запись и видимость у кнопки Start
+
+                    MainActivity.button.setText(getText(R.string.button_save_track));
                     this.getActivity().getApplicationContext().stopService(intent);
                     Log.v("stopService", " end");
 
