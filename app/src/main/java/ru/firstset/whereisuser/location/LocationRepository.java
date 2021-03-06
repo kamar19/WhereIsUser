@@ -17,8 +17,6 @@ public class LocationRepository {
 
     public LocationRepository(Context context) {
         this.context = context;
-        Log.v("LocationRepository","1");
-
         locationDatabase = Room.databaseBuilder(
                 context,
                 LocationDatabase.class,
@@ -27,14 +25,6 @@ public class LocationRepository {
                 .allowMainThreadQueries()
                 .fallbackToDestructiveMigration()
                 .build();
-//        }
-
-
-
-//        locationDatabase = new LocationDatabase();
-//        locationDatabase.createDatabaseInstance(context);
-
-        Log.v("LocationRepository","2");
     }
 //    LocationDAO locationDAO= LocationDatabase. ocationDAO;
 //    CoroutineContext coroutineContext;
@@ -53,19 +43,20 @@ public class LocationRepository {
 //        withContext(context, Dispatchers.getIO(), readLocation());
 //
 //        }
-    public List<LocationUser> readLocations(int track) {
+    public List<LocationUser> readLocation(int track) {
         return locationDatabase.getLocationDao().getLocationByTrack(track);
     }
 
-//    public LocationUser readPastLocation() {
-//        return MyMapFragment.locationDatabase.locationDao(). getLocation();
-//    }
-
+    public List<LocationUser> readAllLocations() {
+        return locationDatabase.getLocationDao().getAllLocations();
+    }
 
     public void saveLocation(LocationUser locationUser) {
 //        Log.v("locationDatabase", locationDatabase.toString());
 //        Log.v("instance", locationDatabase.instance.toString());
 //        Log.v("locationDao", locationDatabase.instance.locationDao.toString());
+        Log.v("saveLocation","0");
+
         locationDatabase.getLocationDao().insert(locationUser);
 //        locationDatabase.instance.locationDao.insert(locationUser);
         Log.v("saveLocation","1");

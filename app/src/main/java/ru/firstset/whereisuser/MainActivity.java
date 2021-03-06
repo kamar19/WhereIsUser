@@ -4,15 +4,16 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -20,34 +21,45 @@ import java.util.List;
 
 import ru.firstset.whereisuser.permission.AppPermission;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
 
     //public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 //    GoogleMap googleMap;
     private static final double TARGET_LATITUDE = 17.893366;
     private static final double TARGET_LONGITUDE = 19.511868;
+    private static final String FRAGMENT_MAP = "FRAGMENT_MAP";
+    private static final String FRAGMENT_HISTORY = "FRAGMENT_HISTORY";
     public static final List<AppPermission> listPermission = null;
 
-//    SupportMapFragment mapFragment;
+    //    SupportMapFragment mapFragment;
     MyMapFragment myMapFragment;
-    public static Button button;
+    FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        button = findViewById(R.id.buttonSaveTrack);
-        button.setText(getText(R.string.button_save_track));
 
 
         if (savedInstanceState == null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            myMapFragment = new MyMapFragment();
+//            fragmentManager = getSupportFragmentManager();
+//            myMapFragment = new MyMapFragment();
+//            fragmentManager.beginTransaction()
+//                    .add(R.id.frameLayoutContainer, myMapFragment, FRAGMENT_MAP)
+//                    .commit();
+            fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .add(R.id.frameLayout, myMapFragment)
+                    .replace(R.id.frameLayoutContainer, new MyMapFragment(), FRAGMENT_MAP)
                     .commit();
+//            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                    .findFragmentById(R.id. mapView);
+
         }
+
+//        mapFragment.getMapAsync(this);
+
+
 
 //        Button button = findViewById(R.id.buttonSaveTrack);
 //        Boolean booleanValue =myMapFragment.checkButtonSaveTrack();
@@ -56,8 +68,6 @@ public class MainActivity extends AppCompatActivity{
 //        } else
 //            button.setText(getText(R.string.button_save_track)); ;
 //
-
-
 
 
     }
@@ -99,7 +109,7 @@ public class MainActivity extends AppCompatActivity{
 //
 //    }
 
-//
+    //
 //
 //    private void addMarker(){
 //
@@ -124,10 +134,7 @@ public class MainActivity extends AppCompatActivity{
 //
 //    }
 //
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void onClickLocationSettings(View view) {
-        myMapFragment. onClick(view);
-    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -137,13 +144,34 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case R.id.menuMap:
-                headerView.setText("Настройки");
-                return true;
-            case R.id.menuHistory:
-                headerView.setText("Открыть");
+        switch (item.getItemId()) {
+            case R.id.menuMap: {
+//                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                        .findFragmentById(R.id.mapView);
+                fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.frameLayoutContainer, new MyMapFragment(), FRAGMENT_MAP)
+                        .commit();
+
+//                MyMapFragment mapFragment = new MyMapFragment();
+//                fragmentManager.beginTransaction()
+//                        .addToBackStack(FRAGMENT_MAP)
+//                        .replace(R.id.frameLayoutContainer, mapFragment, FRAGMENT_MAP)
+//                        .commit();
                 break;
+            }
+            case R.id.menuHistory: {
+                fragmentManager = getSupportFragmentManager();
+                fragmentManager.findFragmentByTag(FRAGMENT_HISTORY);
+                fragmentManager.beginTransaction()
+                        .addToBackStack(FRAGMENT_HISTORY)
+                        .replace(R.id.frameLayoutContainer, new FragmentHistory(), FRAGMENT_HISTORY)
+                        .commit();
+
+
+                break;
+
+            }
             case R.id.menuExit:
                 this.finish();
                 break;
@@ -151,6 +179,7 @@ public class MainActivity extends AppCompatActivity{
         //headerView.setText(item.getTitle());
         return super.onOptionsItemSelected(item);
     }
-}
+
+
 
 }

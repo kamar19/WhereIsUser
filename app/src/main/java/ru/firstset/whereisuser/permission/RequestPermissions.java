@@ -22,6 +22,7 @@ public class RequestPermissions {
     }
 
     public Boolean checkPermission() {
+        Log.v("checkPermission", "0");
         Log.v("checkPermission", String.valueOf(permissions.size()));
         boolean boolPermissions = true;
         for (int i = 0; i < permissions.size() - 1; i++) {

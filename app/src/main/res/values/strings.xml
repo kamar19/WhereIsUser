@@ -19,5 +19,10 @@
     <string name="menu_history">History</string>
     <string name="menu_exit">Exit</string>
 
+    <string name="finishTextViewResultTitle">History of user track</string>
+    <string name="titleIdTrack">IdTrack, </string>
+    <string name="titleDate">Date, </string>
+    <string name="titleCountPoints">Count of points</string>
+    <string name="titleButtonClear">Delete results</string>
 
 </resources>

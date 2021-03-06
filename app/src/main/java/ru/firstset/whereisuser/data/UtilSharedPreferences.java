@@ -7,20 +7,15 @@ import android.view.ViewDebug;
 
 import ru.firstset.whereisuser.MyMapFragment;
 
-public class Track {
+public class UtilSharedPreferences {
     SharedPreferences sharedPreferences;
 
-    public Track(SharedPreferences sharedPreferences) {
+    public UtilSharedPreferences(SharedPreferences sharedPreferences) {
         this.sharedPreferences = sharedPreferences;
     }
 
     public int loadIdTrack() {
-//        if (sharedPreferences != null) {
-        Log.v("BUTTON_KEY",MyMapFragment.BUTTON_KEY);
-//        Integer.valueOf(sharedPreferences.getString(
            String string = sharedPreferences.getString( "BUTTON_KEY2", "1");
-        Log.v("BUTTON_KEY", string);
-
         return Integer.valueOf(string);
     }
 
@@ -34,6 +29,8 @@ public class Track {
     }
     public int loadIdPoint() {
         String string = sharedPreferences.getString( "POINT_KEY", "1");
+        Log.v("loadIdPoint", string);
+
         return Integer.valueOf(string);
     }
 
@@ -43,6 +40,8 @@ public class Track {
         String string =  Integer.toString(id);
         editorSharedPreferences.putString("POINT_KEY", string);
         editorSharedPreferences.apply();
+        Log.v("saveIdPoint", String.valueOf(id));
+
 //        }
     }
 }
