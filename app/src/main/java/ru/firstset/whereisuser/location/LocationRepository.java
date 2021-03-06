@@ -55,12 +55,15 @@ public class LocationRepository {
 //        Log.v("locationDatabase", locationDatabase.toString());
 //        Log.v("instance", locationDatabase.instance.toString());
 //        Log.v("locationDao", locationDatabase.instance.locationDao.toString());
-        Log.v("saveLocation","0");
+        Log.v("saveLocation", String.valueOf(locationUser.track));
 
         locationDatabase.getLocationDao().insert(locationUser);
 //        locationDatabase.instance.locationDao.insert(locationUser);
         Log.v("saveLocation","1");
 
     }
+//    public void deleteAllLocations() {
+//        locationDatabase.getLocationDao().deleteAll();
+//    }
 
 }

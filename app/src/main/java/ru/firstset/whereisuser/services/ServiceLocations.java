@@ -3,15 +3,19 @@ package ru.firstset.whereisuser.services;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
 import java.util.Timer;
 
+import ru.firstset.whereisuser.MainActivity;
 import ru.firstset.whereisuser.R;
+import ru.firstset.whereisuser.data.UtilSharedPreferences;
 import ru.firstset.whereisuser.util.NotificationLocation;
 
 public class ServiceLocations extends Service {
@@ -21,7 +25,7 @@ public class ServiceLocations extends Service {
     private static final int TIMER_PERIOD = 60000;
     public static final String NAME_SERVICE = "ServiceLocation";
     private Timer timerLocation;
-    LocationTimerTask locationTimerTask;
+    MainActivity.LocationTimerTask locationTimerTask;
 
     public ServiceLocations() {
         super();
@@ -45,21 +49,25 @@ public class ServiceLocations extends Service {
             }
             // Новый таймер
             timerLocation = new Timer();
-            locationTimerTask = new LocationTimerTask();
+
+            locationTimerTask = new MainActivity.LocationTimerTask();
             timerLocation.schedule(locationTimerTask, 1000, TIMER_PERIOD);//минута
         }
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        UtilSharedPreferences utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
+//       if (utilSharedPreferences.checkButtonSaveTrack()) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Log.v("onStartCommand()", "true");
-            NotificationLocation notificationLocation = new NotificationLocation(getApplicationContext());
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+               Log.v("onStartCommand()", "true");
+               NotificationLocation notificationLocation = new NotificationLocation(getApplicationContext());
 
-            startForeground(idLocation, notificationLocation.notification);
+               startForeground(idLocation, notificationLocation.notification);
 
-        }
-        else {
-            Log.v("onStartCommand()", "false");
-            startForeground(idLocation, new Notification());
-        }
+           } else {
+               Log.v("onStartCommand()", "false");
+               startForeground(idLocation, new Notification());
+           }
+//       }
         return START_STICKY;
     }
 

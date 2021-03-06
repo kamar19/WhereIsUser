@@ -4,10 +4,12 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.List;
 
-@Entity(tableName = "locationUser")
+//@Entity(tableName = "locationUser")
+@Entity(tableName = "locationUser", primaryKeys = {"id", "track"})
 public class LocationUser {
-    @PrimaryKey
+//    @PrimaryKey
     public int id;
     public Double latitude;
     public Double longitude;
@@ -23,5 +25,6 @@ public class LocationUser {
         this.track = track;
         this.time = time;
     }
+
 }
 

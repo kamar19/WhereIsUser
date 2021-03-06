@@ -3,13 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_history"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_margin="2dp"
     android:layout_marginTop="8dp"
     android:orientation="vertical"
     android:weightSum="10">
-
 
     <TextView
         android:id="@+id/historyTextEditResult"
@@ -18,7 +17,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_margin="20dp"
         android:gravity="center_horizontal"
-        android:text="@string/finishTextViewResultTitle"
+        android:text="@string/finish_result_title"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/fragment_history"
         app:layout_constraintStart_toStartOf="@+id/fragment_history"
@@ -42,7 +41,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="40dp"
             android:layout_weight="0.2"
-            android:text="@string/titleIdTrack"
+            android:text="@string/title_id_track"
             android:textStyle="bold" />
 
         <TextView
@@ -52,7 +51,7 @@
             android:layout_marginStart="40dp"
             android:layout_marginLeft="4dp"
             android:layout_weight="0.4"
-            android:text="@string/titleDate"
+            android:text="@string/title_date"
             android:textStyle="bold" />
 
         <TextView
@@ -61,31 +60,31 @@
             android:layout_height="match_parent"
             android:layout_weight="0.2"
             android:gravity="start"
-            android:text="@string/titleCountPoints"
+            android:text="@string/title_count_points"
             android:textStyle="bold" />
 
     </LinearLayout>
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/historyLinearLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="@+id/fragment_history"
         app:layout_constraintTop_toBottomOf="@+id/historyLinearLayout2"
+        app:layout_constraintBottom_toTopOf="@+id/historyButtonClear"
+
         tools:ignore="MissingConstraints">
-
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="28dp"
-
+            android:fadeScrollbars="true"
+            android:scrollbars="vertical"
             app:layoutManager="LinearLayoutManager" />
-
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
         android:id="@+id/historyButtonClear"
@@ -94,12 +93,13 @@
         android:layout_gravity="end"
         android:layout_margin="20dp"
         android:layout_weight="1"
-        android:text="@string/titleButtonClear"
+        android:text="@string/title_button_clear"
         android:textAllCaps="false"
-
         app:layout_constraintBottom_toBottomOf="@+id/fragment_history"
         app:layout_constraintEnd_toEndOf="@+id/fragment_history"
-        tools:ignore="MissingConstraints"></Button>
+        tools:ignore="MissingConstraints">
+
+    </Button>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

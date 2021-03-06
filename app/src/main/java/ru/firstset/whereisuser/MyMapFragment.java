@@ -1,8 +1,6 @@
 package ru.firstset.whereisuser;
 
-import android.Manifest;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,14 +23,16 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.List;
 import java.util.Objects;
 
 import android.content.Intent;
@@ -46,7 +46,7 @@ import ru.firstset.whereisuser.data.LocationUser;
 import ru.firstset.whereisuser.data.UtilSharedPreferences;
 import ru.firstset.whereisuser.permission.RequestPermissions;
 import ru.firstset.whereisuser.services.ServiceLocations;
-import ru.firstset.whereisuser.util.DataUtils;
+import ru.firstset.whereisuser.util.UtilsOther;
 import ru.firstset.whereisuser.location.LocationRepository;
 
 public class MyMapFragment extends Fragment implements
@@ -80,6 +80,7 @@ public class MyMapFragment extends Fragment implements
     public static Location lastKnownLocation;
     private CameraPosition cameraPosition;
     MarkerOptions marker;
+//    static LocationListenerMap locationListenerMap;
 
     static LocationRepository locationRepository;
     static UtilSharedPreferences utilSharedPreferences;
@@ -139,6 +140,8 @@ public class MyMapFragment extends Fragment implements
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
+
 //        getMapAsync(this);
         setHasOptionsMenu(true);
 //        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
@@ -151,9 +154,13 @@ public class MyMapFragment extends Fragment implements
 //                LocationDatabase.class, DBContract.TABLE_NAME).build();
         locationRepository = new LocationRepository(getActivity());
         utilLocationUser = new UtilLocationUser();
+        currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
+
         currentLatitude = utilLocationUser.getCurrentLatitude(sharedPreferences);
         currentLongitude = utilLocationUser.getCurrentLongitude(sharedPreferences);
 
+//        locationListenerMap = new LocationListenerMap(getContext());
+//        locationListenerMap.getLocation();
 
     }
 
@@ -192,6 +199,7 @@ public class MyMapFragment extends Fragment implements
     public void onConnected(Bundle bundle) {
 
     }
+
     @Override
     public void onConnectionSuspended(int i) {
     }
@@ -243,7 +251,7 @@ public class MyMapFragment extends Fragment implements
 
                 googleMap.setMyLocationEnabled(false);
                 googleMap.getUiSettings().setMyLocationButtonEnabled(true);
-                lastKnownLocation = null;
+//                lastKnownLocation = null;
                 getLocationPermission();
             }
         } catch (SecurityException e) {
@@ -256,10 +264,16 @@ public class MyMapFragment extends Fragment implements
         marker.icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
         googleMap.addMarker(marker);
+
         if (cameraPosition == null) {
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+//                    new LatLng(currentLatitude,
+//                            currentLongitude), DEFAULT_ZOOM));
+
             cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(defaultLocation.latitude, defaultLocation.longitude)).zoom(12).build();
+                    .target(new LatLng(currentLatitude, currentLongitude)).zoom(DEFAULT_ZOOM).build();
         }
+
         googleMap.animateCamera(CameraUpdateFactory
                 .newCameraPosition(cameraPosition));
 
@@ -270,7 +284,13 @@ public class MyMapFragment extends Fragment implements
     public void onResume() {
         super.onResume();
         mapView.onResume();
-        checkButtonSaveTrack();
+        if (utilSharedPreferences.checkButtonSaveTrack()) {
+            utilSharedPreferences.saveButtonSaveTrackVisible(true); // Запись и видумость у кнопки Stop
+            button.setText(getText(R.string.button_save_track));
+        } else {
+            utilSharedPreferences.saveButtonSaveTrackVisible(false); // Запись и видумость у кнопки Stop
+            button.setText(getText(R.string.button_stop_track));
+        }
     }
 
     @Override
@@ -282,7 +302,7 @@ public class MyMapFragment extends Fragment implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+//        mapView.onDestroy();
     }
 
 
@@ -314,96 +334,104 @@ public class MyMapFragment extends Fragment implements
     }
 
     public static void getUserLocation() {
-        LocationUser locationUser;
-        try {
-            if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationClient.getLastLocation();
-                locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            }
-                        } else {
+
+            LocationUser locationUser;
+            try {
+                if (locationPermissionGranted) {
+                    Task<Location> locationResult = fusedLocationClient.getLastLocation();
+                    locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                            if (task.isSuccessful()) {
+                                // Set the map's camera position to the current location of the device.
+                                lastKnownLocation = task.getResult();
+                                Log.v("onComplete", String.valueOf(lastKnownLocation.getLatitude()));
+
+                                if (lastKnownLocation != null) {
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                            new LatLng(lastKnownLocation.getLatitude(),
+                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                }
+                            } else {
 //                            Log.d(, "Current location is null. Using defaults.");
 //                            Log.e(TAG, "Exception: %s", task.getException());
-                            googleMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+                                googleMap.moveCamera(CameraUpdateFactory
+                                        .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                                googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            } catch (SecurityException e) {
+                Log.e("Exception: %s", e.getMessage(), e);
             }
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage(), e);
-        }
-        Log.v("currentLatitude", String.valueOf(currentLatitude));
-        Log.v("currentLongitude", String.valueOf(currentLongitude));
-        utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
-        currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
+//        this.locationListenerMap.getLocation();
 
+//        lastKnownLocation = locationListenerMap.getLocation();
 
-        if (lastKnownLocation != null)
-            if ((currentLatitude != lastKnownLocation.getLatitude()) & (currentLongitude != lastKnownLocation.getLongitude())) {
-                int point = utilSharedPreferences.loadIdPoint();
-                locationUser = new LocationUser(point, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
-                        KEY_LOCATION, currentTrack, DataUtils.getCurrentDateTimeString());
-                Log.v("getUserLocation", locationUser.toString());
-                Log.v("latitude", locationUser.latitude.toString());
-                Log.v("longitude", locationUser.longitude.toString());
-                Log.v("time", locationUser.time.toString());
-                Log.v("title", locationUser.title.toString());
-                Log.v("id", String.valueOf(locationUser.id));
-                Log.v("track", String.valueOf(locationUser.track));
+        if (!utilSharedPreferences.checkButtonSaveTrack()) {
+
+            if (lastKnownLocation != null) {
+                Log.v("getLatitude()", String.valueOf(lastKnownLocation.getLatitude()));
+                Log.v("getLongitude()", String.valueOf(lastKnownLocation.getLongitude()));
+
+            }
+
+            Log.v("currentLatitude", String.valueOf(currentLatitude));
+            Log.v("currentLongitude", String.valueOf(currentLongitude));
+            currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
+
+            if (lastKnownLocation != null) {
+//            if ((currentLatitude != lastKnownLocation.getLatitude()) & (currentLongitude != lastKnownLocation.getLongitude())) {
+                if (!UtilsOther.compareLocations((float) lastKnownLocation.getLatitude(), (float) lastKnownLocation.getLongitude()
+                        , currentLatitude, currentLongitude)) {
+                    int point = utilSharedPreferences.loadIdPoint();
+                    locationUser = new LocationUser(point, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
+                            KEY_LOCATION, currentTrack, UtilsOther.getCurrentDateTimeString());
+                    locationUser.latitude = locationUser.latitude+0.02;
+                    Log.v("getUserLocation", locationUser.toString());
+                    Log.v("latitude", String.valueOf(locationUser.latitude));
+                    Log.v("longitude", String.valueOf(locationUser.longitude));
+                    Log.v("time", locationUser.time.toString());
+                    Log.v("title", locationUser.title.toString());
+                    Log.v("id", String.valueOf(locationUser.id));
+                    Log.v("track", String.valueOf(locationUser.track));
 //            LocationRepository
-                locationRepository.saveLocation(locationUser);
-                Log.v("run()", "Получаем локацию - " +locationUser.id);
-                point++;
-                Log.v("point", String.valueOf(point));
-                utilSharedPreferences.saveIdPoint(point);
+                    locationRepository.saveLocation(locationUser);
+                    Log.v("run()", "Получаем локацию - " + locationUser.id);
+                    drawPoliline(new LatLng(locationUser.latitude,locationUser.longitude));
+                    point++;
+
+                    Log.v("point", String.valueOf(point));
+                    utilSharedPreferences.saveIdPoint(point);
 
 
-                utilLocationUser.saveCurrentLocation(sharedPreferences, currentLatitude, currentLongitude);
-            } else {
-                Log.v("user", "Локация не изменилась! Точка не сохранена");
-
+                    utilLocationUser.saveCurrentLocation(sharedPreferences, (float) lastKnownLocation.getLatitude(), (float) lastKnownLocation.getLongitude());
+                } else {
+                    Log.v("user", "Локация не изменилась! Точка не сохранена");
+                }
+            }
         }
 
 
     }
 
 
-    public void saveButtonSaveTrackVisible(Boolean value) {
-        if (sharedPreferences != null) {
-            SharedPreferences.Editor editorSharedPreferences = sharedPreferences.edit();
-            editorSharedPreferences.putBoolean(BUTTON_KEY, value);
-            editorSharedPreferences.apply();
-            Log.v("saveButton", value.toString());
-        }
+    public static void drawPoliline(LatLng latLng){
+
+
+
+        PolylineOptions polylineOptions = new PolylineOptions();
+//        Polyline polylineTemp = new  Polyline();
+            MyMapFragment.googleMap.addPolyline(new PolylineOptions()
+                    .clickable(true)
+                    .add(latLng)
+            );
+        Log.v("drawPoliline", String.valueOf(latLng.latitude));
+        Log.v("drawPoliline", String.valueOf(latLng.longitude));
     }
 
 
-    public Boolean checkButtonSaveTrack() {
-        Boolean boolValue = false;
-        if (sharedPreferences == null) {
-            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-        }
-
-        boolValue = sharedPreferences.getBoolean(BUTTON_KEY, true);
-        Log.v("checkButtonSaveTrack", boolValue.toString());
-        if (boolValue) {
-            button.setText(getText(R.string.button_save_track));
-        } else {
-            button.setText(getText(R.string.button_stop_track));
-        }
-
-        return boolValue;
-    }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onClick(View v) {
@@ -423,13 +451,15 @@ public class MyMapFragment extends Fragment implements
                 Intent intent = new Intent(Objects.requireNonNull(this.getActivity()).getApplicationContext(), ServiceLocations.class);
                 Log.v("onClick", "intent");
 
-                if (checkButtonSaveTrack()) {
-                    Log.v("onClick", "true");
-                    saveButtonSaveTrackVisible(false); // Запись и видумость у кнопки Stop
+                if (utilSharedPreferences.checkButtonSaveTrack()) {
+                    utilSharedPreferences.saveButtonSaveTrackVisible(false); // Запись и видумость у кнопки Stop
                     button.setText(getText(R.string.button_stop_track));
 
-                    currentTrack=utilSharedPreferences.loadIdTrack();
+                    currentTrack = utilSharedPreferences.loadIdTrack();
                     Log.v("currentTrack", String.valueOf(currentTrack));
+                    int point = 1;
+                    Log.v("point", String.valueOf(point));
+                    utilSharedPreferences.saveIdPoint(point);
 
                     getUserLocation();
                     this.getActivity().getApplicationContext().startService(intent);
@@ -438,8 +468,7 @@ public class MyMapFragment extends Fragment implements
 
                 } else {
                     Log.v("onClick", "false");
-                    saveButtonSaveTrackVisible(true); // Запись и видимость у кнопки Start
-
+                    utilSharedPreferences.saveButtonSaveTrackVisible(true); // Запись и видимость у кнопки Start
                     button.setText(getText(R.string.button_save_track));
                     this.getActivity().getApplicationContext().stopService(intent);
                     Log.v("stopService", " end");
@@ -449,6 +478,7 @@ public class MyMapFragment extends Fragment implements
             }
         }
     }
+
 
 //    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 //    public void onClickLocationSettings(View view) {

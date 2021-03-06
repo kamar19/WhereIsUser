@@ -16,6 +16,8 @@ import android.location.LocationListener;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
+
 import static android.content.Context.LOCATION_SERVICE;
 
 
@@ -73,6 +75,7 @@ public class LocationListenerMap implements LocationListener {
                 this.canGetLocation = true;
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
+
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                             && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
@@ -84,11 +87,13 @@ public class LocationListenerMap implements LocationListener {
                         // for ActivityCompat#requestPermissions for more details.
 //                        return TODO;
                     }
+
+
                     locationManager.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER,
                             MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network");
+//                    Log.d("Network", "Network");
                     if (locationManager != null) {
                         location = locationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -98,6 +103,20 @@ public class LocationListenerMap implements LocationListener {
                         }
                     }
                 }
+//                куда втыкать текущее последнее положение,
+//                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+//                                        new LatLng(lastKnownLocation.getLatitude(),
+//                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+//                            }
+
+
+
+
+
+
+
+
+
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                     if (location == null) {

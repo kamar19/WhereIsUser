@@ -5,7 +5,6 @@
     <string name="button_location_settings">Location settings</string>
     <string name="button_save_track">Save Track</string>
     <string name="button_stop_track">Stop Track</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="google_api_key_map">"AIzaSyAeo26-Gbx-YUVe60sTLZqtuZPeM9lqbH0"</string>
     <string name="channel_new_messages_description">New location</string>
@@ -18,11 +17,15 @@
     <string name="menu_map">Map</string>
     <string name="menu_history">History</string>
     <string name="menu_exit">Exit</string>
+    <string name="finish_result_title">History of user track</string>
+    <string name="title_id_track">IdTrack, </string>
+    <string name="title_date">Date, </string>
+    <string name="title_count_points">Count of points</string>
+    <string name="title_button_clear">Delete all tracks</string>
+    <string name="alert_dialog_title">Delete user tracks!</string>
+    <string name="alert_dialog_message">Delete all tracks?</string>
+    <string name="alert_dialog_positive_button_text">Ok</string>
+    <string name="alert_dialog_negative_button_text">Cancel</string>
 
-    <string name="finishTextViewResultTitle">History of user track</string>
-    <string name="titleIdTrack">IdTrack, </string>
-    <string name="titleDate">Date, </string>
-    <string name="titleCountPoints">Count of points</string>
-    <string name="titleButtonClear">Delete results</string>
 
 </resources>

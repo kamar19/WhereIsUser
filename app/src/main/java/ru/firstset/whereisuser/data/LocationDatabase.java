@@ -11,45 +11,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
-@Database(entities = {LocationUser.class}, version = 1)
+@Database(entities = {LocationUser.class}, version = 2)
 public abstract class LocationDatabase extends RoomDatabase {
     public abstract LocationDAO getLocationDao();
-//
-//    public LocationDatabase instance;
-//
-//    public LocationDatabase createDatabaseInstance(Context applicationContext) {
-//        Log.v("createDatabase", "0");
-//
-////        if (instance == null) {
-//            Log.v("createDatabase", "1");
-//
-//            instance = Room.databaseBuilder(
-//                    applicationContext,
-//                    LocationDatabase.class,
-//                    DBContract.DATABASE_NAME
-//            )
-//                    .fallbackToDestructiveMigration()
-//                    .build();
-////        }
-//        Log.v("createDatabase", instance.toString());
-//
-//        return instance;
-//    }
-//
-//    @NonNull
-//    @Override
-//    protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration config) {
-//        return null;
-//    }
-//
-//    @NonNull
-//    @Override
-//    protected InvalidationTracker createInvalidationTracker() {
-//        return null;
-//    }
-//
-//    @Override
-//    public void clearAllTables() {
-//
-//    }
+
 }
