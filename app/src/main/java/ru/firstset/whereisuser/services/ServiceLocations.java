@@ -25,7 +25,7 @@ public class ServiceLocations extends Service {
     private static final int TIMER_PERIOD = 60000;
     public static final String NAME_SERVICE = "ServiceLocation";
     private Timer timerLocation;
-    MainActivity.LocationTimerTask locationTimerTask;
+    LocationTimerTask locationTimerTask;
 
     public ServiceLocations() {
         super();
@@ -50,7 +50,7 @@ public class ServiceLocations extends Service {
             // Новый таймер
             timerLocation = new Timer();
 
-            locationTimerTask = new MainActivity.LocationTimerTask();
+            locationTimerTask = new LocationTimerTask();
             timerLocation.schedule(locationTimerTask, 1000, TIMER_PERIOD);//минута
         }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

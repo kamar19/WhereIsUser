@@ -1,6 +1,7 @@
 package ru.firstset.whereisuser;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -91,7 +93,7 @@ public class MyMapFragment extends Fragment implements
     static Float currentLongitude;
     static UtilLocationUser utilLocationUser;
     Button button;
-
+    public static List<LocationUser> listLocationUser;
 
     public static LocationDatabase locationDatabase;
 
@@ -223,6 +225,60 @@ public class MyMapFragment extends Fragment implements
 //                .title("Marker"));
         setUpMap();
         getUserLocation();
+        if (listLocationUser != null) {
+            if (listLocationUser.size() > 0) {
+                Polyline polyline = null;
+//                PolylineOptions polylineOptions = new PolylineOptions();
+                List<LatLng> latLngs = new ArrayList<>();
+
+                for (int i = 0; i < listLocationUser.size() - 1; i++) {
+                    latLngs.add(new LatLng(listLocationUser.get(i).latitude + i / 10000, listLocationUser.get(i).longitude + i / 10000));
+                    Log.v("onItemClick", String.valueOf(listLocationUser.get(i).latitude + i / 10000));
+                    Log.v("onItemClick", String.valueOf(listLocationUser.get(i).longitude + i / 10000));
+
+                }
+                if (latLngs != null) {
+                    polyline = googleMap.addPolyline(new PolylineOptions()
+                            .clickable(true)
+                            .addAll(latLngs));
+                }
+
+
+                polyline.setWidth(10);
+                polyline.setColor(Color.parseColor("#FF0000"));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
+                        listLocationUser.get(listLocationUser.size() - 1).latitude, listLocationUser.get(listLocationUser.size() - 1).longitude), 14));
+                listLocationUser.clear();
+            }
+
+        }
+
+
+//
+//
+//
+//        Polyline path = googleMap.addPolyline(new PolylineOptions()
+//                .add(
+//                        new LatLng(38.893596444352134, -77.0381498336792),
+//                        new LatLng(38.89337933372204, -77.03792452812195),
+//                        new LatLng(38.89316222242831, -77.03761339187622),
+//                        new LatLng(38.893028615148424, -77.03731298446655),
+//                        new LatLng(38.892920059048464, -77.03691601753235),
+//                        new LatLng(38.892903358095296, -77.03637957572937),
+//                        new LatLng(38.89301191422077, -77.03592896461487),
+//                        new LatLng(38.89316222242831, -77.03549981117249),
+//                        new LatLng(38.89340438498248, -77.03514575958252),
+//                        new LatLng(38.893596444352134, -77.0349633693695)
+//                )
+//        );
+//
+//
+//        // Style the polyline
+//        path.setWidth(10);
+//        path.setColor(Color.parseColor("#FF0000"));
+//
+//        // Position the map's camera
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.89399, -77.03659), 16));
 
 
     }
@@ -249,7 +305,7 @@ public class MyMapFragment extends Fragment implements
             } else {
                 Log.e("setMyLocationEnabled", "false");
 
-                googleMap.setMyLocationEnabled(false);
+//                googleMap.setMyLocationEnabled(false);
                 googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 //                lastKnownLocation = null;
                 getLocationPermission();
@@ -258,24 +314,24 @@ public class MyMapFragment extends Fragment implements
             Log.e("Exception: %s", e.getMessage());
         }
 
-        marker = new MarkerOptions().position(
-                new LatLng(defaultLocation.latitude,
-                        defaultLocation.longitude)).title("Hello Maps");
-        marker.icon(BitmapDescriptorFactory
-                .defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
-        googleMap.addMarker(marker);
+//        marker = new MarkerOptions().position(
+//                new LatLng(defaultLocation.latitude,
+//                        defaultLocation.longitude)).title("Hello Maps");
+//        marker.icon(BitmapDescriptorFactory
+//                .defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+//        googleMap.addMarker(marker);
 
-        if (cameraPosition == null) {
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-//                    new LatLng(currentLatitude,
-//                            currentLongitude), DEFAULT_ZOOM));
-
-            cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(currentLatitude, currentLongitude)).zoom(DEFAULT_ZOOM).build();
-        }
-
-        googleMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(cameraPosition));
+//        if (cameraPosition == null) {
+////            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+////                    new LatLng(currentLatitude,
+////                            currentLongitude), DEFAULT_ZOOM));
+//
+//            cameraPosition = new CameraPosition.Builder()
+//                    .target(new LatLng(currentLatitude, currentLongitude)).zoom(DEFAULT_ZOOM).build();
+//        }
+//
+//        googleMap.animateCamera(CameraUpdateFactory
+//                .newCameraPosition(cameraPosition));
 
 
     }
@@ -335,36 +391,36 @@ public class MyMapFragment extends Fragment implements
 
     public static void getUserLocation() {
 
-            LocationUser locationUser;
-            try {
-                if (locationPermissionGranted) {
-                    Task<Location> locationResult = fusedLocationClient.getLastLocation();
-                    locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Location> task) {
-                            if (task.isSuccessful()) {
-                                // Set the map's camera position to the current location of the device.
-                                lastKnownLocation = task.getResult();
-                                Log.v("onComplete", String.valueOf(lastKnownLocation.getLatitude()));
+        LocationUser locationUser;
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationClient.getLastLocation();
+                locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            lastKnownLocation = task.getResult();
+                            Log.v("onComplete", String.valueOf(lastKnownLocation.getLatitude()));
 
-                                if (lastKnownLocation != null) {
-                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                            new LatLng(lastKnownLocation.getLatitude(),
-                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                                }
-                            } else {
+                            if (lastKnownLocation != null) {
+                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(lastKnownLocation.getLatitude(),
+                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            }
+                        } else {
 //                            Log.d(, "Current location is null. Using defaults.");
 //                            Log.e(TAG, "Exception: %s", task.getException());
-                                googleMap.moveCamera(CameraUpdateFactory
-                                        .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                                googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-                            }
+                            googleMap.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
-                    });
-                }
-            } catch (SecurityException e) {
-                Log.e("Exception: %s", e.getMessage(), e);
+                    }
+                });
             }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
 //        this.locationListenerMap.getLocation();
 
 //        lastKnownLocation = locationListenerMap.getLocation();
@@ -388,7 +444,7 @@ public class MyMapFragment extends Fragment implements
                     int point = utilSharedPreferences.loadIdPoint();
                     locationUser = new LocationUser(point, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
                             KEY_LOCATION, currentTrack, UtilsOther.getCurrentDateTimeString());
-                    locationUser.latitude = locationUser.latitude+0.02;
+                    locationUser.latitude = locationUser.latitude + 0.2;
                     Log.v("getUserLocation", locationUser.toString());
                     Log.v("latitude", String.valueOf(locationUser.latitude));
                     Log.v("longitude", String.valueOf(locationUser.longitude));
@@ -399,7 +455,7 @@ public class MyMapFragment extends Fragment implements
 //            LocationRepository
                     locationRepository.saveLocation(locationUser);
                     Log.v("run()", "Получаем локацию - " + locationUser.id);
-                    drawPoliline(new LatLng(locationUser.latitude,locationUser.longitude));
+//                    drawPoliline(new LatLng(locationUser.latitude,locationUser.longitude));
                     point++;
 
                     Log.v("point", String.valueOf(point));
@@ -417,16 +473,15 @@ public class MyMapFragment extends Fragment implements
     }
 
 
-    public static void drawPoliline(LatLng latLng){
-
+    public static void drawPoliline(LatLng latLng) {
 
 
         PolylineOptions polylineOptions = new PolylineOptions();
 //        Polyline polylineTemp = new  Polyline();
-            MyMapFragment.googleMap.addPolyline(new PolylineOptions()
-                    .clickable(true)
-                    .add(latLng)
-            );
+        MyMapFragment.googleMap.addPolyline(new PolylineOptions()
+                .clickable(true)
+                .add(latLng)
+        );
         Log.v("drawPoliline", String.valueOf(latLng.latitude));
         Log.v("drawPoliline", String.valueOf(latLng.longitude));
     }
