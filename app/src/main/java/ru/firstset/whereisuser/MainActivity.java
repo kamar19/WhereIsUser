@@ -1,29 +1,20 @@
 package ru.firstset.whereisuser;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-import android.content.Intent;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 import java.util.TimerTask;
 
-import ru.firstset.whereisuser.data.TrackPolyline;
-import ru.firstset.whereisuser.location.LocationListenerMap;
+import ru.firstset.whereisuser.data.tracker.TrackPolyline;
 import ru.firstset.whereisuser.permission.AppPermission;
 
 public class MainActivity extends AppCompatActivity {
@@ -216,31 +207,9 @@ public class MainActivity extends AppCompatActivity {
         }.start();
     }
 
-    public class LocationTimerTask extends TimerTask {
-//    private static int idRud=0;
-//    LocationListenerMap locationListenerMap;
-
-
-        @Override
-        public void run() {
-            // Получаем локацию, возможно сравниваем с предыдущей и записываем если новая в БД
-            try {
-                runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        MyMapFragment.lastKnownLocation.getLatitude();
-//                            idRud++;
-                        MyMapFragment.getUserLocation();
-                    }
-                });
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-
-//        new Thread() {
+//    public class LocationTimerTask extends TimerTask {
+//
+//        @Override
 //        public void run() {
 //            try {
 //                runOnUiThread(new Runnable() {
@@ -256,10 +225,7 @@ public class MainActivity extends AppCompatActivity {
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-//
 //        }
-//    }.start();
-        }
-
-    }
+//
+//    }
 }

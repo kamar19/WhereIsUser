@@ -7,20 +7,14 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import android.util.Log;
-
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-
 import ru.firstset.whereisuser.R;
-
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
-
 
 public class NotificationLocation extends Notification {
     private final String CHANNEL_NAME = "whereisuser";
     private final String UNIQUE_ID_CHANNEL = "ru.firstset.whereisuser";
-
     public Notification notification;
     public NotificationManager notificationManager;
     public NotificationChannel notificationChannel;
@@ -28,7 +22,6 @@ public class NotificationLocation extends Notification {
     @RequiresApi(api = Build.VERSION_CODES.O)
 
     public NotificationLocation(Context context) {
-//        initNotificationChannel(context);
         initNotification(context);
     }
 
@@ -42,7 +35,6 @@ public class NotificationLocation extends Notification {
         notificationManager.createNotificationChannel(notificationChannel);
         return UNIQUE_ID_CHANNEL;
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void initNotification(Context context) {

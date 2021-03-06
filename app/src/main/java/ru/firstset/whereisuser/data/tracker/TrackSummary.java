@@ -1,4 +1,4 @@
-package ru.firstset.whereisuser.data;
+package ru.firstset.whereisuser.data.tracker;
 
 public class TrackSummary {
 

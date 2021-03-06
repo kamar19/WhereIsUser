@@ -3,16 +3,10 @@ package ru.firstset.whereisuser.util;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-
-import ru.firstset.whereisuser.MainActivity;
-import ru.firstset.whereisuser.MyMapFragment;
 import ru.firstset.whereisuser.R;
-
 public class DialogFragment extends android.app.DialogFragment implements DialogInterface.OnClickListener {
-
         private int resultDialog = 0;
         final String LOG_TAG = "myDialogLogs";
 
@@ -41,7 +35,6 @@ public class DialogFragment extends android.app.DialogFragment implements Dialog
                     break;
             }
         }
-
 
         public void onDismiss(DialogInterface dialog) {
             super.onDismiss(dialog);

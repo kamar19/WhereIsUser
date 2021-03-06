@@ -1,4 +1,4 @@
-package ru.firstset.whereisuser.data;
+package ru.firstset.whereisuser.data.tracker;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -24,5 +24,4 @@ public class TrackEntity {
             this.time = time;
         }
     }
-
 }

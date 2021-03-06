@@ -1,15 +1,9 @@
-package ru.firstset.whereisuser.data;
+package ru.firstset.whereisuser.data.location;
 
-import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 
-import java.util.List;
-
-//@Entity(tableName = "locationUser")
 @Entity(tableName = "locationUser", primaryKeys = {"id", "track"})
 public class LocationUser {
-//    @PrimaryKey
     public int id;
     public Double latitude;
     public Double longitude;
