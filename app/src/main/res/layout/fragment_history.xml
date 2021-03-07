@@ -6,85 +6,96 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="2dp"
-    android:layout_marginTop="8dp"
     android:orientation="vertical"
     android:weightSum="10">
 
-    <TextView
-        android:id="@+id/historyTextEditResult"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="20dp"
-        android:gravity="center_horizontal"
-        android:text="@string/finish_result_title"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_history"
-        app:layout_constraintStart_toStartOf="@+id/fragment_history"
-        app:layout_constraintTop_toTopOf="@+id/fragment_history" />
-
     <LinearLayout
-        android:id="@+id/historyLinearLayout2"
+        android:id="@+id/historyLinearLayout0"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/historyTextEditResult"
         android:layout_margin="8dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_history"
-        app:layout_constraintStart_toStartOf="@+id/fragment_history"
-        app:layout_constraintTop_toBottomOf="@+id/historyTextEditResult">
-
-        <TextView
-            android:id="@+id/idTrack"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="40dp"
-            android:layout_weight="0.2"
-            android:text="@string/title_id_track"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/historyTrackDate"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="40dp"
-            android:layout_marginLeft="4dp"
-            android:layout_weight="0.4"
-            android:text="@string/title_date"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/historyCountPoints"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.2"
-            android:gravity="start"
-            android:text="@string/title_count_points"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/historyLinearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="@+id/fragment_history"
-        app:layout_constraintTop_toBottomOf="@+id/historyLinearLayout2"
         app:layout_constraintBottom_toTopOf="@+id/historyButtonClear"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_history"
 
-        tools:ignore="MissingConstraints">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listRecycler"
+        app:layout_constraintStart_toStartOf="@+id/fragment_history"
+        app:layout_constraintTop_toTopOf="@+id/fragment_history">
+
+        <TextView
+            android:id="@+id/historyTextEditResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:gravity="center_horizontal"
+            android:text="@string/finish_result_title"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/historyLinearLayout0"
+            app:layout_constraintStart_toStartOf="@+id/historyLinearLayout0"
+            app:layout_constraintTop_toTopOf="@+id/historyLinearLayout0" />
+
+        <LinearLayout
+            android:id="@+id/historyLinearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_marginTop="40dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="@+id/fragment_history"
+            app:layout_constraintTop_toBottomOf="@+id/historyTextEditResult">
+
+            <TextView
+                android:id="@+id/idTrack"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="40dp"
+                android:layout_weight="0.2"
+                android:text="@string/title_id_track"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/historyTrackDate"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="40dp"
+                android:layout_weight="0.4"
+                android:text="@string/title_date"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/historyCountPoints"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0.2"
+                android:gravity="start"
+                android:text="@string/title_count_points"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/historyLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="28dp"
-            android:fadeScrollbars="true"
-            android:scrollbars="vertical"
-            app:layoutManager="LinearLayoutManager" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_marginTop="5dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/historyButtonClear">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:fadeScrollbars="true"
+
+                android:scrollbars="vertical"
+                app:layoutManager="LinearLayoutManager" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/historyButtonClear"

@@ -9,10 +9,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -28,13 +30,15 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.Button;
-import ru.firstset.whereisuser.util.UtilLocationUser;
+
 import ru.firstset.whereisuser.data.location.LocationUser;
 import ru.firstset.whereisuser.util.UtilSharedPreferences;
 import ru.firstset.whereisuser.permission.RequestPermissions;
@@ -54,7 +58,9 @@ public class MyMapFragment extends Fragment implements
     private static boolean locationPermissionGranted;
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
-    public static final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    public static final LatLng defaultLocation = new LatLng(52.288288288288275, 76.96901459898956);
+//                                                             52.48828828828829       76.96901459898946
+
     private static final int DEFAULT_ZOOM = 15;
     private static SharedPreferences sharedPreferences;
     public static final String BUTTON_KEY = "BUTTON_KEY";
@@ -75,9 +81,8 @@ public class MyMapFragment extends Fragment implements
     static int currentTrack;
     //    static int currentPoint;
     //    static CurrentLocationUser currentLocationUser;
-    static Float currentLatitude;
-    static Float currentLongitude;
-    static UtilLocationUser utilLocationUser;
+//    public static Float currentLatitude;
+//    public static Float currentLongitude;
     Button button;
     public static List<LocationUser> listLocationUser;
 
@@ -119,10 +124,9 @@ public class MyMapFragment extends Fragment implements
         utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
         setHasOptionsMenu(true);
         locationRepository = new LocationRepository(getActivity());
-        utilLocationUser = new UtilLocationUser();
         currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
-        currentLatitude = utilLocationUser.getCurrentLatitude(sharedPreferences);
-        currentLongitude = utilLocationUser.getCurrentLongitude(sharedPreferences);
+//        currentLatitude = utilSharedPreferences.getCurrentLatitude(sharedPreferences);
+//        currentLongitude = utilSharedPreferences.getCurrentLongitude(sharedPreferences);
     }
 
     @Override
@@ -147,28 +151,86 @@ public class MyMapFragment extends Fragment implements
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
         setUpMap();
-        getUserLocation();
+//        getUserLocation();
+
+        if (!utilSharedPreferences.checkButtonSaveTrack()) {
+            //Если нажата кнопка, рисуем текущий трек
+//            Log.v("currentTrack", String.valueOf(currentTrack));
+
+//            if (lastKnownLocation != null) {
+            Log.v("currentTrack", String.valueOf(currentTrack));
+            currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
+            listLocationUser = locationRepository.readLocation(currentTrack);
+
+            //          }
+        }
+
+
+//        Log.v("listLocationUser", String.valueOf(listLocationUser.size()));
+
         if (listLocationUser != null) {
             if (listLocationUser.size() > 0) {
-                Polyline polyline = null;
-                List<LatLng> latLngs = new ArrayList<>();
-                for (int i = 0; i < listLocationUser.size() - 1; i++) {
+
+//                    Polyline polyline = null;
+//                List<LatLng> latLngs = new ArrayList<>();
+                ArrayList<LatLng> latLngs = new ArrayList<LatLng>();
+                for (int i = 0; i < listLocationUser.size(); i++) {
                     latLngs.add(new LatLng(listLocationUser.get(i).latitude, listLocationUser.get(i).longitude));
-//                    Log.v("onItemClick", String.valueOf(listLocationUser.get(i).latitude + i / 10000));
-//                    Log.v("onItemClick", String.valueOf(listLocationUser.get(i).longitude + i / 10000));
+                    Log.v("for (int", String.valueOf(listLocationUser.get(i).latitude));
+                    Log.v("for (int", String.valueOf(listLocationUser.get(i).longitude));
                 }
-                if (latLngs != null) {
-                    polyline = googleMap.addPolyline(new PolylineOptions()
-                            .clickable(true)
-                            .addAll(latLngs));
+
+                for (int j = 0; j < latLngs.size(); j++) {
+                    Log.v("latLngs", String.valueOf(latLngs.get(j).latitude));
                 }
+
+                Log.v("latLngs.size ", String.valueOf(latLngs.size()));
+                Log.v("listLocationUser", String.valueOf(listLocationUser.size()));
+
+                Polyline polyline = googleMap.addPolyline(new PolylineOptions()
+//                        .clickable(true)
+                        .addAll(latLngs));
                 polyline.setWidth(10);
                 polyline.setColor(Color.parseColor("#FF0000"));
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
-                        listLocationUser.get(listLocationUser.size() - 1).latitude, listLocationUser.get(listLocationUser.size() - 1).longitude), 14));
-                listLocationUser.clear();
+
+//                float tempLatitude = UtilsOther.getFloatRoun3(listLocationUser.get(listLocationUser.size() - 1).latitude);
+//                float tempLongitude = UtilsOther.getFloatRoun3(listLocationUser.get(listLocationUser.size() - 1).longitude);
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(listLocationUser.get(listLocationUser.size() - 1).latitude
+                        , listLocationUser.get(listLocationUser.size() - 1).longitude), 14));
+//                Log.v("latitude", String.valueOf(tempLatitude));
+//                Log.v("longitude", String.valueOf(tempLongitude));
+
             }
+            listLocationUser.clear();
+
+//            listLocationUser.get(listLocationUser.size() - 1).longitude;
+
+
         }
+
+//
+//        Polyline path = googleMap.addPolyline(new PolylineOptions()
+//                .add(
+//                        new LatLng(38.893596444352134, -77.0381498336792),
+//                        new LatLng(38.89337933372204, -77.03792452812195),
+//                        new LatLng(38.89316222242831, -77.03761339187622),
+//                        new LatLng(38.893028615148424, -77.03731298446655),
+//                        new LatLng(38.892920059048464, -77.03691601753235),
+//                        new LatLng(38.892903358095296, -77.03637957572937),
+//                        new LatLng(38.89301191422077, -77.03592896461487),
+//                        new LatLng(38.89316222242831, -77.03549981117249),
+//                        new LatLng(38.89340438498248, -77.03514575958252),
+//                        new LatLng(38.893596444352134, -77.0349633693695)
+//                )
+//        );
+//
+//        // Style the polyline
+//        path.setWidth(10);
+//        path.setColor(Color.parseColor("#FF0000"));
+//
+//        // Position the map's camera
+//        this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.89399, -77.03659), 16));
+
 
     }
 
@@ -241,21 +303,21 @@ public class MyMapFragment extends Fragment implements
         LocationUser locationUser;
         try {
             if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationClient.getLastLocation();
+                Task locationResult = fusedLocationClient.getLastLocation();
                 locationResult.addOnCompleteListener(new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
+                        if (task.isSuccessful()&&task.getResult() != null) {
+                            lastKnownLocation = (Location)task.getResult();
+                            Log.v("onComplete", String.valueOf(lastKnownLocation.getLatitude()));
+                            Log.v("onComplete", String.valueOf(lastKnownLocation.getLongitude()));
                                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            }
                         } else {
                             googleMap.moveCamera(CameraUpdateFactory
                                     .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+//                            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
                 });
@@ -263,26 +325,51 @@ public class MyMapFragment extends Fragment implements
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
+
         if (!utilSharedPreferences.checkButtonSaveTrack()) {
-//            if (lastKnownLocation != null) {
-//                Log.v("getLatitude()", String.valueOf(lastKnownLocation.getLatitude()));
-//                Log.v("getLongitude()", String.valueOf(lastKnownLocation.getLongitude()));
-//            Log.v("currentLatitude", String.valueOf(currentLatitude));
-//            Log.v("currentLongitude", String.valueOf(currentLongitude));
+            //Если нажата кнопка
             currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
             if (lastKnownLocation != null) {
-                if (!UtilsOther.compareLocations((float) lastKnownLocation.getLatitude(), (float) lastKnownLocation.getLongitude()
-                        , currentLatitude, currentLongitude)) {
-                    int point = utilSharedPreferences.loadIdPoint();
-                    locationUser = new LocationUser(point, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
-                            KEY_LOCATION, currentTrack, UtilsOther.getCurrentDateTimeString());
-                    locationUser.latitude = locationUser.latitude + 0.2;
-                    locationRepository.saveLocation(locationUser);
+                int point = utilSharedPreferences.loadIdPoint();
+                Log.v("point", String.valueOf(point));
+
+                utilSharedPreferences.loadIdTrack();
+//                currentTrack = Integer.valueOf(utilSharedPreferences.loadIdTrack());
+                listLocationUser = locationRepository.readLocation(currentTrack);
+                Double TempLatitude = defaultLocation.latitude;
+                Double TempLongitude = defaultLocation.longitude;
+
+                if (point > 1) {
+                    Log.v("listLocationUser", String.valueOf(listLocationUser));
+
+                    LocationUser locationUserTemp = listLocationUser.get(point - 2);
+                    TempLatitude = locationUserTemp.latitude;
+                    TempLongitude = locationUserTemp.longitude;
+                }
+
+
+                Log.v("getLatitude()", String.valueOf(lastKnownLocation.getLatitude()));
+                Log.v("getLongitude()", String.valueOf(lastKnownLocation.getLongitude()));
+                Log.v("currentLatitude", String.valueOf(TempLatitude));
+                Log.v("currentLongitude", String.valueOf(TempLongitude));
+
+                if ((!UtilsOther.compareLocations(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()
+                        , TempLatitude, TempLongitude)) | (point == 1)) {
+//                    currentLatitude = (float) lastKnownLocation.getLatitude();
+//                    currentLongitude = (float) lastKnownLocation.getLongitude();
+
+//                    locationUser = new LocationUser(point, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
+//                            KEY_LOCATION, currentTrack, UtilsOther.getCurrentDateTimeString());
+//                    locationUser.latitude = locationUser.latitude;
+                    locationRepository.saveLocation(new LocationUser(point, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
+                            KEY_LOCATION, currentTrack, UtilsOther.getCurrentDateTimeString()));
                     point++;
                     utilSharedPreferences.saveIdPoint(point);
-                    utilLocationUser.saveCurrentLocation(sharedPreferences, (float) lastKnownLocation.getLatitude(), (float) lastKnownLocation.getLongitude());
+                    utilSharedPreferences.saveCurrentLocation(sharedPreferences, (float) lastKnownLocation.getLatitude(), (float) lastKnownLocation.getLongitude());
+                    Log.v("getUserLocation", "Save " + String.valueOf(lastKnownLocation.getLatitude()) + ", " + String.valueOf(lastKnownLocation.getLongitude()));
+
                 } else {
-                    Log.v("user", "Локация не изменилась! Точка не сохранена");
+                    Log.v("getUserLocation", "Локация не изменилась! Точка не сохранена");
                 }
             }
         }

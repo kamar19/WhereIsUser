@@ -80,6 +80,7 @@ public class FragmentHistory extends Fragment implements View.OnClickListener, T
         PolylineOptions polylineOptions = new PolylineOptions();
         MainActivity.fragmentManager.popBackStack();
         MyMapFragment.listLocationUser = locationRepository.readLocation(trackSummaryList.get(position).getIdTrack());
+        Log.v("getIdTrack", String.valueOf(trackSummaryList.get(position).getIdTrack()));
 
     }
 }

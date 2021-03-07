@@ -9,8 +9,8 @@ import java.util.List;
 
 @Dao
 public interface LocationDAO {
-    @Query("SELECT * FROM locationUser WHERE id= :id ORDER BY time DESC")
-    public LocationUser getLocationById(int id);
+//    @Query("SELECT * FROM locationUser WHERE id= :id ORDER BY time DESC")
+//    public LocationUser getLocationById(int id);
 
     @Query("SELECT track, count(id) AS id, time, title,latitude, longitude FROM locationUser GROUP BY track")
     public List<LocationUser> getAllLocations();
