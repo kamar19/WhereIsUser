@@ -183,29 +183,29 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    });
 
-
-    public void runThread() {
-
-        new Thread() {
-            public void run() {
-                try {
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            MyMapFragment.lastKnownLocation.getLatitude();
-//                            idRud++;
-                            MyMapFragment.getUserLocation();
-                        }
-                    });
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }.start();
-    }
+//
+//    public void runThread() {
+//
+//        new Thread() {
+//            public void run() {
+//                try {
+//                    runOnUiThread(new Runnable() {
+//
+//                        @Override
+//                        public void run() {
+//                            MyMapFragment.lastKnownLocation.getLatitude();
+////                            idRud++;
+//                            MyMapFragment.getUserLocation();
+//                        }
+//                    });
+//                    Thread.sleep(300);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//        }.start();
+//    }
 
 //    public class LocationTimerTask extends TimerTask {
 //

@@ -14,7 +14,7 @@ import ru.firstset.whereisuser.util.NotificationLocation;
 public class ServiceLocations extends Service {
     private static final int idLocation = 505050;
     private static final int idLocation2= 505052;
-    private static final int TIMER_PERIOD = 60000;
+    private static final int TIMER_PERIOD = 10000;
     public static final String NAME_SERVICE = "ServiceLocation";
     private Timer timerLocation;
     LocationTimerTask locationTimerTask;
@@ -30,15 +30,15 @@ public class ServiceLocations extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if ((flags & START_FLAG_RETRY) == 0) {
-            if (timerLocation != null) {
-                timerLocation.cancel();
-                timerLocation = null;
-            }
-            timerLocation = new Timer();
-            locationTimerTask = new LocationTimerTask();
-            timerLocation.schedule(locationTimerTask, 1000, TIMER_PERIOD);//минута
-        }
+//        if ((flags & START_FLAG_RETRY) == 0) {
+//            if (timerLocation != null) {
+//                timerLocation.cancel();
+//                timerLocation = null;
+//            }
+//            timerLocation = new Timer();
+//            locationTimerTask = new LocationTimerTask();
+//            timerLocation.schedule(locationTimerTask, 1000, TIMER_PERIOD);//минута
+//        }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         UtilSharedPreferences utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

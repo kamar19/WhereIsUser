@@ -2,6 +2,7 @@ package ru.firstset.whereisuser.permission;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -19,7 +20,7 @@ public class RequestPermissions {
         this.activity = activity;
         this.permissions.add(new AppPermission(Manifest.permission.ACCESS_COARSE_LOCATION, 100));
         this.permissions.add(new AppPermission(Manifest.permission.ACCESS_FINE_LOCATION, 200));
-    }
+        }
 
     public Boolean checkPermission() {
         Log.v("checkPermission", "0");

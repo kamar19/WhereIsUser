@@ -26,6 +26,7 @@
     <string name="alert_dialog_message">Delete all tracks?</string>
     <string name="alert_dialog_positive_button_text">Ok</string>
     <string name="alert_dialog_negative_button_text">Cancel</string>
+    <string name="check_location">check Location</string>
 
 
 </resources>

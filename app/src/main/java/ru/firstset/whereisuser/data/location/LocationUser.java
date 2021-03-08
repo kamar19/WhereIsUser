@@ -2,7 +2,7 @@ package ru.firstset.whereisuser.data.location;
 
 import androidx.room.Entity;
 
-@Entity(tableName = "locationUser", primaryKeys = {"id", "track"})
+@Entity(tableName = "locationUser", primaryKeys = {"track","id"})
 public class LocationUser {
     public int id;
     public Double latitude;
