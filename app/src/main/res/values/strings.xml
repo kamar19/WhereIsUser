@@ -27,6 +27,9 @@
     <string name="alert_dialog_positive_button_text">Ok</string>
     <string name="alert_dialog_negative_button_text">Cancel</string>
     <string name="check_location">check Location</string>
+    <string name="title_activity_start_screen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 
 </resources>

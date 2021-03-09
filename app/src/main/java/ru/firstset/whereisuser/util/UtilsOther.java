@@ -27,13 +27,4 @@ public class UtilsOther {
             return false;
         }
     }
-//    public static float getFloatRoun3(Double doubleIn){
-////        String result = String.format("%.3f",doubleIn);
-////        return Float.valueOf(result);
-////        double value = 34.777774;
-////        double scale = Math.pow(10, 3);
-////        Float result = Math.ceil(value * scale) / scale;
-//        float result = (float) ((float) Math.round(doubleIn * 100000d) / 100000d);
-//        return result;
-//    }
 }

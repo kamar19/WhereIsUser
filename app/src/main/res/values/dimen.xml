@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="start_screen_view_width">220dp</dimen>
+    <dimen name="start_screen_view_height">220dp</dimen>
+
+</resources>
