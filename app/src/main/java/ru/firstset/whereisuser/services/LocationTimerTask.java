@@ -13,18 +13,7 @@ public class LocationTimerTask extends TimerTask {
     public void run() {
 //        MyMapFragment.lastKnownLocation.getLatitude();
 //        idRud++;
-//        MyMapFragment.checkLocation2();// getUserLocation();
+//        MyMapFragment.getUserLocation();// getUserLocation();
 //        Log.v("run()", String.valueOf(idRud));
-
-
-
-
-
-
-
-
-
     }
-
-
 }
