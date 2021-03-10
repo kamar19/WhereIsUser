@@ -25,8 +25,8 @@ public class ServiceLocations extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        UtilSharedPreferences utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+//        UtilSharedPreferences utilSharedPreferences = new UtilSharedPreferences(sharedPreferences);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationLocation notificationLocation = new NotificationLocation(getApplicationContext());
             startForeground(idLocation, notificationLocation.notification);

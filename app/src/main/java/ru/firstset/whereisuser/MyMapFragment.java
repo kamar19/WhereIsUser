@@ -389,6 +389,7 @@ public class MyMapFragment extends Fragment implements
             utilSharedPreferences.saveIdPoint(point);
             minTimeUpdates = MIN_TIME_BW_UPDATES;
             minDistance = MIN_DISTANCE_CHANGE_FOR_UPDATES; // 1 meters
+            getUserLocation();
             checkLocation();
             this.getActivity().getApplicationContext().startService(intent);
         } else {
@@ -398,6 +399,7 @@ public class MyMapFragment extends Fragment implements
             button.setText(getText(R.string.button_save_track));
             minTimeUpdates = MIN_TIME_BW_START;
             minDistance = MIN_DISTANCE_CHANGE_FOR_START; // 1 meters
+            getUserLocation();
             checkLocation();
             this.getActivity().getApplicationContext().stopService(intent);
         }
