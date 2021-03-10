@@ -9,7 +9,7 @@
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
 
-    <style name="Splash" parent="Widget.AppCompat.ActionBar">
+    <style name="Theme.WhereIsUser.Splash" parent="Theme.WhereIsUser">
         <item name="android:windowBackground">@drawable/screen_layout</item>
     </style>
 </resources>
